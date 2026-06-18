@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentdelta"
+name = "redline"
 version = "0.1.0"
 description = "Semantic diff engine for AI agent behavior — find the exact decision fork between two runs"
 readme = "README.md"
@@ -58,15 +58,15 @@ docs = [
 ]
 
 [project.scripts]
-agentdelta = "agentdelta.cli:main"
-agentdelta-mcp = "agentdelta.mcp_server:run_server"
+redline = "redline.cli:main"
+redline-mcp = "redline.mcp_server:run_server"
 
 [project.urls]
-Homepage      = "https://github.com/sandeep-alluru/agentdelta"
-Repository    = "https://github.com/sandeep-alluru/agentdelta"
-Documentation = "https://sandeep-alluru.github.io/agentdelta"
-Changelog     = "https://github.com/sandeep-alluru/agentdelta/blob/main/CHANGELOG.md"
-Issues        = "https://github.com/sandeep-alluru/agentdelta/issues"
+Homepage      = "https://github.com/sandeep-alluru/redline"
+Repository    = "https://github.com/sandeep-alluru/redline"
+Documentation = "https://sandeep-alluru.github.io/redline"
+Changelog     = "https://github.com/sandeep-alluru/redline/blob/main/CHANGELOG.md"
+Issues        = "https://github.com/sandeep-alluru/redline/issues"
 
 # ── Ruff ──────────────────────────────────────────────────────────────────────
 [tool.ruff]
@@ -111,11 +111,11 @@ check_untyped_defs       = true
 # ── Pytest ────────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts   = "--cov=agentdelta --cov-report=term-missing --cov-report=xml"
+addopts   = "--cov=redline --cov-report=term-missing --cov-report=xml"
 
 # ── Coverage ──────────────────────────────────────────────────────────────────
 [tool.coverage.run]
-source   = ["agentdelta"]
+source   = ["redline"]
 branch   = true
 omit     = ["*/tests/*", "*/examples/*"]
 

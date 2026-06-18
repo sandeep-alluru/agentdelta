@@ -1,8 +1,8 @@
-"""Tests for agentdelta.diff."""
+"""Tests for redline.diff."""
 
 from __future__ import annotations
 
-from agentdelta.diff import DiffResult, ForkPoint, diff_traces
+from redline.diff import DiffResult, ForkPoint, diff_traces
 
 
 def test_no_regression_on_similar_traces(simple_trace_a, simple_trace_b_match):

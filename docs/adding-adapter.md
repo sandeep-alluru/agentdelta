@@ -1,6 +1,6 @@
 # Adding a Framework Adapter
 
-agentdelta ships with a LangChain/LangGraph adapter. This guide shows how to add support for another framework.
+redline ships with a LangChain/LangGraph adapter. This guide shows how to add support for another framework.
 
 ## Overview
 
@@ -15,7 +15,7 @@ An adapter is a thin shim that hooks into a framework's event system and emits `
 ## Step 1 — Create the adapter module
 
 ```python
-# src/agentdelta/instrument_myframework.py
+# src/redline/instrument_myframework.py
 from __future__ import annotations
 
 import contextlib
@@ -24,7 +24,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
+from redline.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
 
 
 class MyFrameworkAdapter:
@@ -94,10 +94,10 @@ def record_myframework(
 
 ## Step 2 — Export from `__init__.py`
 
-Add to `src/agentdelta/__init__.py`:
+Add to `src/redline/__init__.py`:
 
 ```python
-from agentdelta.instrument_myframework import MyFrameworkAdapter, record_myframework
+from redline.instrument_myframework import MyFrameworkAdapter, record_myframework
 
 __all__ = [
     ...,
@@ -121,9 +121,9 @@ myframework = ["myframework>=1.0"]
 
 ```python
 # tests/test_instrument_myframework.py
-from agentdelta import AgentTrace
-from agentdelta.instrument_myframework import MyFrameworkAdapter, record_myframework
-from agentdelta.trace import NodeType
+from redline import AgentTrace
+from redline.instrument_myframework import MyFrameworkAdapter, record_myframework
+from redline.trace import NodeType
 
 
 def test_adapter_captures_llm_node():

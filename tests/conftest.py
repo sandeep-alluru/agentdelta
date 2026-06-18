@@ -1,10 +1,10 @@
-"""Shared fixtures for agentdelta tests."""
+"""Shared fixtures for redline tests."""
 
 from __future__ import annotations
 
 import pytest
 
-from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
+from redline.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
 
 
 def _make_trace(run_id: str, steps: list[tuple[NodeType, str]]) -> AgentTrace:

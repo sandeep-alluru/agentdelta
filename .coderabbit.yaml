@@ -14,13 +14,13 @@ reviews:
     - "!assets/**"
     - "!*.md"
   path_instructions:
-    - path: "src/agentdelta/diff.py"
+    - path: "src/redline/diff.py"
       instructions: |
         This is the core fork-detection algorithm. Be strict about:
         - Threshold defaults must not change without a migration note
         - New status values must be added to the literal type in StepDiff
         - Fork detection must remain O(n) per alignment pair
-    - path: "src/agentdelta/embed.py"
+    - path: "src/redline/embed.py"
       instructions: |
         Thread safety: _get_model() uses double-checked locking. Any change
         to the singleton pattern must preserve thread safety.

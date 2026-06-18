@@ -1,4 +1,4 @@
-Generate boilerplate code to record an agent run with agentdelta.
+Generate boilerplate code to record an agent run with redline.
 
 Usage: /project:record [framework] [agent_variable_name]
 
@@ -8,7 +8,7 @@ Generate a self-contained Python snippet that:
 
 For LangChain/LangGraph (default):
 ```python
-from agentdelta import record
+from redline import record
 
 # Baseline (before your change)
 with record("baseline.jsonl", run_id="v1.0") as cb:
@@ -21,8 +21,8 @@ with record("candidate.jsonl", run_id="v1.1") as cb:
 
 For custom/framework-agnostic:
 ```python
-from agentdelta import AgentTrace
-from agentdelta.trace import TraceNode, TraceEdge, NodeType, EdgeType
+from redline import AgentTrace
+from redline.trace import TraceNode, TraceEdge, NodeType, EdgeType
 
 trace = AgentTrace(run_id="my_run")
 trace.add_node(TraceNode(step=1, node_type=NodeType.START, content="user input here"))
@@ -33,9 +33,9 @@ trace.add_node(TraceNode(step=5, node_type=NodeType.END, content="final output")
 trace.save("my_run.jsonl")
 ```
 
-Then show the diff command: `agentdelta diff baseline.jsonl candidate.jsonl`
+Then show the diff command: `redline diff baseline.jsonl candidate.jsonl`
 
 Context:
-- AgentDeltaCallback is LangChain BaseCallbackHandler-compatible (no import of BaseCallbackHandler needed)
+- RedlineCallback is LangChain BaseCallbackHandler-compatible (no import of BaseCallbackHandler needed)
 - record() saves the trace on context exit, even if the agent raises an exception
 - run_id appears in the diff report header — use something meaningful (version, git hash, etc.)

@@ -1,11 +1,11 @@
 # MCP / Claude Integration
 
-agentdelta ships an MCP (Model Context Protocol) server that exposes its core operations as native Claude tools.
+redline ships an MCP (Model Context Protocol) server that exposes its core operations as native Claude tools.
 
 ## Install
 
 ```bash
-pip install "agentdelta[mcp]"
+pip install "redline[mcp]"
 ```
 
 ## Add to Claude Desktop
@@ -16,8 +16,8 @@ Edit `~/.config/claude/claude_desktop_config.json` (Linux) or
 ```json
 {
   "mcpServers": {
-    "agentdelta": {
-      "command": "agentdelta-mcp"
+    "redline": {
+      "command": "redline-mcp"
     }
   }
 }
@@ -72,4 +72,4 @@ After cloning the repo, these project-level commands are available in Claude Cod
 
 ## Smithery
 
-agentdelta is also listed on [smithery.ai](https://smithery.ai) — an MCP server marketplace. Search for "agentdelta" to install with one click from Claude Desktop.
+redline is also listed on [smithery.ai](https://smithery.ai) — an MCP server marketplace. Search for "redline" to install with one click from Claude Desktop.

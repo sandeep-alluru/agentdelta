@@ -1,26 +1,26 @@
 # Architecture
 
-agentdelta is a pure-Python library with five independent modules and a thin CLI layer.
+redline is a pure-Python library with five independent modules and a thin CLI layer.
 
 ## Module map
 
 ```
-src/agentdelta/
+src/redline/
 ├── trace.py        # Data model: TraceNode, TraceEdge, AgentTrace
 ├── embed.py        # Embedding + sliding-window alignment
 ├── diff.py         # Fork detection algorithm → DiffResult
 ├── instrument.py   # LangChain callback + record() context manager
 ├── report.py       # Rich / JSON / Markdown output formatters
 ├── cli.py          # Click CLI (thin wrapper over diff + report)
-├── api.py          # FastAPI REST wrapper (pip install agentdelta[api])
-└── mcp_server.py   # MCP server (pip install agentdelta[mcp])
+├── api.py          # FastAPI REST wrapper (pip install redline[api])
+└── mcp_server.py   # MCP server (pip install redline[mcp])
 ```
 
 ## Data flow
 
 ```mermaid
 flowchart TD
-    A[Agent run\nLangChain / custom] -->|on_llm_end\non_tool_start\non_tool_end| B[AgentDeltaCallback\ninstrument.py]
+    A[Agent run\nLangChain / custom] -->|on_llm_end\non_tool_start\non_tool_end| B[RedlineCallback\ninstrument.py]
     B --> C[AgentTrace\ntrace.py\nlist of TraceNode + TraceEdge\nsaved as JSONL]
     C --> D[embed_trace\nembed.py\nall-MiniLM-L6-v2\n384-dim vectors]
     D --> E[align_traces\nembed.py\nsliding-window cosine\ngreedy 1:1 match]

@@ -46,7 +46,7 @@ jobs:
           ruff format --check src/ tests/
 
       - name: Type check (mypy)
-        run: mypy src/agentdelta/ --ignore-missing-imports
+        run: mypy src/redline/ --ignore-missing-imports
 
       - name: Test
         run: pytest tests/ -v --tb=short
@@ -86,14 +86,14 @@ jobs:
           path: ~/.cache/huggingface
           key: hf-all-MiniLM-L6-v2
 
-      - name: Install agentdelta
+      - name: Install redline
         run: pip install -e .
 
       - name: Run behavioral diff (if trace files exist)
         id: diff
         run: |
           if [ -f traces/baseline.jsonl ] && [ -f traces/candidate.jsonl ]; then
-            agentdelta diff traces/baseline.jsonl traces/candidate.jsonl \
+            redline diff traces/baseline.jsonl traces/candidate.jsonl \
               --format markdown --exit-code > diff_output.md
             echo "has_traces=true" >> $GITHUB_OUTPUT
             echo "exit_code=$?" >> $GITHUB_OUTPUT

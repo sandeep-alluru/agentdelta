@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/hero.png" alt="agentdelta — semantic diff for AI agent behavior" width="720" />
+<img src="assets/hero.png" alt="redline — semantic diff for AI agent behavior" width="720" />
 
 <br/>
 
@@ -8,12 +8,12 @@
 
 Detect the exact step where two agent runs diverged — which tool it switched to, when its reasoning changed, what prompt edit caused the fork. Built for CI/CD on AI agents.
 
-[![CI](https://github.com/sandeep-alluru/agentdelta/actions/workflows/ci.yml/badge.svg)](https://github.com/sandeep-alluru/agentdelta/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/agentdelta.svg)](https://pypi.org/project/agentdelta/)
-[![Python 3.10+](https://img.shields.io/pypi/pyversions/agentdelta.svg)](https://pypi.org/project/agentdelta/)
-[![Downloads](https://img.shields.io/pypi/dm/agentdelta.svg)](https://pypi.org/project/agentdelta/)
+[![CI](https://github.com/sandeep-alluru/redline/actions/workflows/ci.yml/badge.svg)](https://github.com/sandeep-alluru/redline/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/redline.svg)](https://pypi.org/project/redline/)
+[![Python 3.10+](https://img.shields.io/pypi/pyversions/redline.svg)](https://pypi.org/project/redline/)
+[![Downloads](https://img.shields.io/pypi/dm/redline.svg)](https://pypi.org/project/redline/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![codecov](https://codecov.io/gh/sandeep-alluru/agentdelta/branch/main/graph/badge.svg)](https://codecov.io/gh/sandeep-alluru/agentdelta)
+[![codecov](https://codecov.io/gh/sandeep-alluru/redline/branch/main/graph/badge.svg)](https://codecov.io/gh/sandeep-alluru/redline)
 [![Typed](https://img.shields.io/badge/types-mypy-blue)](https://mypy-lang.org/)
 
 [Quick Start](#quick-start) · [How It Works](#how-it-works) · [CLI Reference](#cli-reference) · [GitHub Action](#github-action) · [vs. Alternatives](#vs-alternatives) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
@@ -23,7 +23,7 @@ Detect the exact step where two agent runs diverged — which tool it switched t
 ---
 
 > [!NOTE]
-> agentdelta evaluates **behavior**, not output. Two runs can produce identical final answers while the agent took completely different paths — calling different tools, in different orders, with different reasoning chains. agentdelta catches that.
+> redline evaluates **behavior**, not output. Two runs can produce identical final answers while the agent took completely different paths — calling different tools, in different orders, with different reasoning chains. redline catches that.
 
 ---
 
@@ -35,7 +35,7 @@ Most LLM evaluations check: *did the agent get the right answer?* They miss the 
 - **Model upgrades change behavior** — moving from GPT-4o-mini to GPT-4o or Claude 3.5 Sonnet → Opus changes reasoning paths even when benchmark scores stay flat
 - **Tool-calling regressions are silent** — an agent that starts calling `web_search` instead of `read_database` may produce correct answers today and fail tomorrow when the web page moves
 
-agentdelta gives every agent deployment a behavioral fingerprint so you can detect divergence in CI before it reaches production.
+redline gives every agent deployment a behavioral fingerprint so you can detect divergence in CI before it reaches production.
 
 ---
 
@@ -44,21 +44,21 @@ agentdelta gives every agent deployment a behavioral fingerprint so you can dete
 **Install:**
 
 ```bash
-pip install agentdelta
+pip install redline
 # or zero-install with pipx:
-pipx run agentdelta --help
+pipx run redline --help
 ```
 
 **With LangChain/LangGraph:**
 
 ```bash
-pip install "agentdelta[langchain]"
+pip install "redline[langchain]"
 ```
 
 **Capture two runs:**
 
 ```python
-from agentdelta import record
+from redline import record
 
 # Baseline run (before your change)
 with record("baseline.jsonl", run_id="v1.0") as cb:
@@ -72,12 +72,12 @@ with record("candidate.jsonl", run_id="v1.1") as cb:
 **Diff them:**
 
 ```bash
-agentdelta diff baseline.jsonl candidate.jsonl
+redline diff baseline.jsonl candidate.jsonl
 ```
 
 ```
 ╭───────────────────────────────────────────────╮
-│ agentdelta  v1.0 vs v1.1                      │
+│ redline  v1.0 vs v1.1                      │
 ╰───────────────────────────────────────────────╯
   🔴 REGRESSION DETECTED  3/6 steps matched (50.0%)  1 changed  +1 added  -1 removed
 
@@ -138,8 +138,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full data flow and algorithm deta
 ## Python API
 
 ```python
-from agentdelta import AgentTrace, diff_traces
-from agentdelta.report import print_diff, to_json, to_markdown
+from redline import AgentTrace, diff_traces
+from redline.report import print_diff, to_json, to_markdown
 
 trace_a = AgentTrace.load("baseline.jsonl")
 trace_b = AgentTrace.load("candidate.jsonl")
@@ -167,7 +167,7 @@ markdown_str = to_markdown(result)
 ## CLI Reference
 
 ```
-agentdelta diff TRACE_A TRACE_B [OPTIONS]
+redline diff TRACE_A TRACE_B [OPTIONS]
 ```
 
 | Option | Default | Description |
@@ -179,7 +179,7 @@ agentdelta diff TRACE_A TRACE_B [OPTIONS]
 | `--exit-code` | `false` | Exit 1 if regression detected (for CI) |
 
 ```
-agentdelta inspect TRACE_FILE
+redline inspect TRACE_FILE
 ```
 
 Prints a step-by-step summary of a single trace file.
@@ -205,12 +205,12 @@ You can generate traces from any agent framework by writing nodes and edges dire
 
 ## GitHub Action
 
-Use agentdelta directly in your GitHub Actions workflow:
+Use redline directly in your GitHub Actions workflow:
 
 ```yaml
 # .github/workflows/agent-regression.yml
 - name: Behavioral diff
-  uses: sandeep-alluru/agentdelta@v0.1.0
+  uses: sandeep-alluru/redline@v0.1.0
   with:
     baseline: traces/baseline.jsonl
     candidate: traces/candidate.jsonl
@@ -219,18 +219,18 @@ Use agentdelta directly in your GitHub Actions workflow:
 - name: Post diff as PR comment
   uses: marocchino/sticky-pull-request-comment@v2
   with:
-    path: agentdelta-diff.md
+    path: redline-diff.md
 ```
 
 Or use the CLI directly:
 
 ```yaml
-- name: Install agentdelta
-  run: pip install agentdelta
+- name: Install redline
+  run: pip install redline
 
 - name: Behavioral diff
   run: |
-    agentdelta diff traces/baseline.jsonl traces/candidate.jsonl \
+    redline diff traces/baseline.jsonl traces/candidate.jsonl \
       --format markdown --exit-code > diff.md
 
 - name: Post comment
@@ -259,18 +259,18 @@ response = openai.chat.completions.create(
 )
 ```
 
-**GPT Actions / Custom GPTs** — the `openapi.yaml` at repo root is a complete OpenAPI 3.1 spec. To register agentdelta as a ChatGPT Action:
-1. Run `pip install "agentdelta[api]" && uvicorn agentdelta.api:app` (or deploy to any host)
+**GPT Actions / Custom GPTs** — the `openapi.yaml` at repo root is a complete OpenAPI 3.1 spec. To register redline as a ChatGPT Action:
+1. Run `pip install "redline[api]" && uvicorn redline.api:app` (or deploy to any host)
 2. In ChatGPT → My GPTs → Create → Add Action → import from `openapi.yaml`
 
 ---
 
 ## Claude / MCP integration
 
-Install the MCP server to use agentdelta as a native Claude tool — no CLI needed:
+Install the MCP server to use redline as a native Claude tool — no CLI needed:
 
 ```bash
-pip install "agentdelta[mcp]"
+pip install "redline[mcp]"
 ```
 
 Add to your Claude Desktop config (`~/.config/claude/claude_desktop_config.json` on Linux, `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
@@ -278,8 +278,8 @@ Add to your Claude Desktop config (`~/.config/claude/claude_desktop_config.json`
 ```json
 {
   "mcpServers": {
-    "agentdelta": {
-      "command": "agentdelta-mcp"
+    "redline": {
+      "command": "redline-mcp"
     }
   }
 }
@@ -301,7 +301,7 @@ Claude then has three tools: **`diff_traces`**, **`inspect_trace`**, **`record_s
 
 ## vs. Alternatives
 
-| | agentdelta | LangSmith | Arize / Phoenix | Weave (W&B) |
+| | redline | LangSmith | Arize / Phoenix | Weave (W&B) |
 |---|---|---|---|---|
 | **Behavioral diff (two runs)** | ✅ core feature | ❌ | ❌ | ❌ |
 | **Fork point detection** | ✅ step-level | ❌ | ❌ | ❌ |
@@ -313,15 +313,15 @@ Claude then has three tools: **`diff_traces`**, **`inspect_trace`**, **`record_s
 | **Eval / scoring** | planned | ✅ | ✅ | ✅ |
 | **Cost** | free / MIT | free tier + paid | free tier + paid | free tier + paid |
 
-agentdelta is not an observability platform — it is a **diff tool**. Use it alongside LangSmith or Phoenix for collection and scoring, and agentdelta for behavioral regression detection in CI.
+redline is not an observability platform — it is a **diff tool**. Use it alongside LangSmith or Phoenix for collection and scoring, and redline for behavioral regression detection in CI.
 
 ---
 
 ## Repository structure
 
 ```
-agentdelta/
-├── src/agentdelta/
+redline/
+├── src/redline/
 │   ├── trace.py          # Data model: TraceNode, TraceEdge, AgentTrace
 │   ├── embed.py          # Embeddings + sliding-window alignment
 │   ├── diff.py           # Fork detection → DiffResult, ForkPoint
@@ -338,7 +338,7 @@ agentdelta/
 │   │   └── release.yml   # PyPI publish on tag push
 │   ├── ISSUE_TEMPLATE/   # Bug report + feature request templates
 │   └── PULL_REQUEST_TEMPLATE.md
-├── action.yml            # Use agentdelta as a GitHub Action
+├── action.yml            # Use redline as a GitHub Action
 ├── ARCHITECTURE.md       # Full data flow + algorithm details
 ├── CONTRIBUTING.md       # How to contribute
 ├── CHANGELOG.md          # Release history
@@ -350,8 +350,8 @@ agentdelta/
 ## Development
 
 ```bash
-git clone https://github.com/sandeep-alluru/agentdelta
-cd agentdelta
+git clone https://github.com/sandeep-alluru/redline
+cd redline
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pre-commit install
@@ -384,8 +384,8 @@ llm  agents  langchain  diff  regression-testing  mcp  behavioral-testing  ci-cd
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=sandeep-alluru/agentdelta&type=Date)](https://star-history.com/#sandeep-alluru/agentdelta&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=sandeep-alluru/redline&type=Date)](https://star-history.com/#sandeep-alluru/redline&Date)
 
-*If agentdelta saved you from a silent behavioral regression, consider giving it a ⭐*
+*If redline saved you from a silent behavioral regression, consider giving it a ⭐*
 
 </div>

@@ -6,7 +6,7 @@ import threading
 
 import numpy as np
 
-from agentdelta.trace import AgentTrace, TraceNode
+from redline.trace import AgentTrace, TraceNode
 
 _lock = threading.Lock()
 _model = None

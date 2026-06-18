@@ -1,4 +1,4 @@
-# agentdelta — Agent Context
+# redline — Agent Context
 
 This file is read by AI coding assistants to understand project architecture and conventions:
 **OpenAI Codex CLI** · **Claude Code** · **GitHub Copilot** · **Cursor** · **Windsurf** · **Aider** · **Continue.dev**
@@ -7,20 +7,20 @@ For tool-specific developer guides see: `CLAUDE.md` (Claude Code) · `CODEX.md` 
 
 ## What this project does
 
-agentdelta is a semantic diff engine for AI agent behavior. It records the step-by-step reasoning trace of an LLM agent (LLM calls, tool calls, tool returns) as a JSONL file, then compares two runs and finds the exact step where the agent's behavior diverged.
+redline is a semantic diff engine for AI agent behavior. It records the step-by-step reasoning trace of an LLM agent (LLM calls, tool calls, tool returns) as a JSONL file, then compares two runs and finds the exact step where the agent's behavior diverged.
 
 Primary use case: behavioral regression testing in CI/CD — detect when a model upgrade, prompt change, or tool swap silently changes how an agent reasons, not just what it outputs.
 
 ## Module map
 
 ```
-src/agentdelta/
+src/redline/
 ├── trace.py        # Data model: TraceNode, TraceEdge, AgentTrace (JSONL save/load)
 ├── embed.py        # SentenceTransformer embeddings + sliding-window alignment
 ├── diff.py         # Fork detection → DiffResult with ForkPoint
 ├── instrument.py   # LangChain callback + record() context manager
 ├── report.py       # Rich terminal / JSON / GitHub PR Markdown output
-└── cli.py          # Click CLI: agentdelta diff, agentdelta inspect
+└── cli.py          # Click CLI: redline diff, redline inspect
 ```
 
 ## Key invariants

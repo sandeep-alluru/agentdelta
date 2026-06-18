@@ -1,8 +1,8 @@
-site_name: agentdelta
+site_name: redline
 site_description: Semantic diff engine for AI agent behavior
-site_url: https://sandeep-alluru.github.io/agentdelta
-repo_url: https://github.com/sandeep-alluru/agentdelta
-repo_name: sandeep-alluru/agentdelta
+site_url: https://sandeep-alluru.github.io/redline
+repo_url: https://github.com/sandeep-alluru/redline
+repo_name: sandeep-alluru/redline
 edit_uri: edit/main/docs/
 
 theme:
@@ -90,9 +90,9 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/sandeep-alluru/agentdelta
+      link: https://github.com/sandeep-alluru/redline
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/agentdelta/
+      link: https://pypi.org/project/redline/
   analytics:
     provider: google
     property: ""

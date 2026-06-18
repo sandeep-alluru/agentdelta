@@ -1,6 +1,6 @@
-# agentdelta — Developer Guide
+# redline — Developer Guide
 
-agentdelta is a semantic diff engine for AI agent behavior. It records step-by-step agent traces as JSONL, embeds nodes with `all-MiniLM-L6-v2`, aligns two traces by cosine similarity, and detects the first semantic fork point.
+redline is a semantic diff engine for AI agent behavior. It records step-by-step agent traces as JSONL, embeds nodes with `all-MiniLM-L6-v2`, aligns two traces by cosine similarity, and detects the first semantic fork point.
 
 ## Architecture
 
@@ -8,9 +8,9 @@ agentdelta is a semantic diff engine for AI agent behavior. It records step-by-s
 trace.py        Data model: NodeType, EdgeType, TraceNode, TraceEdge, AgentTrace
 embed.py        sentence-transformers singleton + sliding-window alignment
 diff.py         Fork detection → DiffResult, ForkPoint, StepDiff
-instrument.py   LangChain callback (AgentDeltaCallback) + record() context manager
+instrument.py   LangChain callback (RedlineCallback) + record() context manager
 report.py       Rich terminal / JSON / Markdown output formatters
-cli.py          Click CLI: `agentdelta diff` and `agentdelta inspect`
+cli.py          Click CLI: `redline diff` and `redline inspect`
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full data flow and algorithm details.
@@ -18,8 +18,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full data flow and algorithm details.
 ## Setup
 
 ```bash
-git clone https://github.com/sandeep-alluru/agentdelta
-cd agentdelta
+git clone https://github.com/sandeep-alluru/redline
+cd redline
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pre-commit install
@@ -60,9 +60,9 @@ pytest -k "test_fork"           # by name
 
 ## Adding a new instrumentation adapter
 
-1. Create `src/agentdelta/instrument_<framework>.py`
+1. Create `src/redline/instrument_<framework>.py`
 2. Implement a class that emits `TraceNode` objects to an `AgentTrace`
-3. Export from `src/agentdelta/__init__.py`
+3. Export from `src/redline/__init__.py`
 4. Document in README under "Quick start"
 
 ## PR conventions

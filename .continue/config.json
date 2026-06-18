@@ -1,5 +1,5 @@
 {
-  "name": "agentdelta",
+  "name": "redline",
   "version": "0.1.0",
   "schema": "v1",
   "context": [
@@ -16,7 +16,7 @@
   ],
   "docs": [
     {
-      "title": "agentdelta Architecture",
+      "title": "redline Architecture",
       "startUrl": "file://./ARCHITECTURE.md",
       "faviconUrl": ""
     }
@@ -24,17 +24,17 @@
   "customCommands": [
     {
       "name": "diff",
-      "prompt": "Run agentdelta diff on the two trace files I specify. Explain the fork point in plain English, whether it represents a behavioral regression, and what likely caused it (prompt change, model upgrade, tool order change). Files: {input}",
-      "description": "Diff two agentdelta trace files and explain any fork"
+      "prompt": "Run redline diff on the two trace files I specify. Explain the fork point in plain English, whether it represents a behavioral regression, and what likely caused it (prompt change, model upgrade, tool order change). Files: {input}",
+      "description": "Diff two redline trace files and explain any fork"
     },
     {
       "name": "add-adapter",
-      "prompt": "Scaffold a new agentdelta instrumentation adapter for the framework: {input}. Follow the pattern in src/agentdelta/instrument.py. Create the adapter file, export it from __init__.py, and write at least 3 tests.",
+      "prompt": "Scaffold a new redline instrumentation adapter for the framework: {input}. Follow the pattern in src/redline/instrument.py. Create the adapter file, export it from __init__.py, and write at least 3 tests.",
       "description": "Scaffold a new framework instrumentation adapter"
     }
   ],
   "rules": [
-    "This is agentdelta — a semantic diff engine for AI agent traces.",
+    "This is redline — a semantic diff engine for AI agent traces.",
     "All embeddings must go through _get_model() in embed.py. Never import SentenceTransformer directly.",
     "TraceNode.id is content-addressed (SHA-256). Never assign it manually.",
     "Library code must not use print() — use rich.console.Console.",

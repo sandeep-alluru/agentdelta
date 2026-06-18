@@ -1,9 +1,9 @@
-Inspect an agentdelta trace file and summarize the agent's execution path.
+Inspect an redline trace file and summarize the agent's execution path.
 
 Usage: /project:inspect <trace.jsonl>
 
 Steps:
-1. Run: `agentdelta inspect $ARGUMENTS`
+1. Run: `redline inspect $ARGUMENTS`
 2. Present a clean summary:
    - Total steps and run_id
    - Sequence of node types (start → llm → tool_call → tool_return → ... → end)

@@ -1,15 +1,15 @@
-# agentdelta — Windsurf Rules
+# redline — Windsurf Rules
 
 ## Project overview
-agentdelta is a Python library and CLI for semantic diff of AI agent behavior. It captures agent traces (LLM calls, tool calls, tool returns) as JSONL, embeds each step locally with sentence-transformers, and finds the first fork point between two runs.
+redline is a Python library and CLI for semantic diff of AI agent behavior. It captures agent traces (LLM calls, tool calls, tool returns) as JSONL, embeds each step locally with sentence-transformers, and finds the first fork point between two runs.
 
 ## Architecture
-- `src/agentdelta/trace.py` — TraceNode (content-addressed), TraceEdge, AgentTrace (JSONL I/O)
-- `src/agentdelta/embed.py` — thread-safe all-MiniLM-L6-v2 singleton, cosine similarity, sliding-window alignment
-- `src/agentdelta/diff.py` — diff_traces(), DiffResult, ForkPoint, StepDiff
-- `src/agentdelta/instrument.py` — AgentDeltaCallback (LangChain), record() context manager
-- `src/agentdelta/report.py` — Rich terminal, JSON, Markdown output
-- `src/agentdelta/cli.py` — agentdelta diff / inspect CLI
+- `src/redline/trace.py` — TraceNode (content-addressed), TraceEdge, AgentTrace (JSONL I/O)
+- `src/redline/embed.py` — thread-safe all-MiniLM-L6-v2 singleton, cosine similarity, sliding-window alignment
+- `src/redline/diff.py` — diff_traces(), DiffResult, ForkPoint, StepDiff
+- `src/redline/instrument.py` — RedlineCallback (LangChain), record() context manager
+- `src/redline/report.py` — Rich terminal, JSON, Markdown output
+- `src/redline/cli.py` — redline diff / inspect CLI
 
 ## Rules
 1. All embeddings must go through `_get_model()` in embed.py — never import SentenceTransformer directly

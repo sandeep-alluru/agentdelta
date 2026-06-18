@@ -1,17 +1,17 @@
 openapi: "3.1.0"
 info:
-  title: agentdelta API
+  title: redline API
   description: |
     Semantic diff engine for AI agent behavior.
     Compare two agent execution traces and detect the exact step where behavior diverged.
-    Run locally: `pip install "agentdelta[api]"` then `uvicorn agentdelta.api:app`
+    Run locally: `pip install "redline[api]"` then `uvicorn redline.api:app`
   version: "0.1.0"
   contact:
     name: Sandeep Alluru
     email: onepuncchh@gmail.com
   license:
     name: MIT
-    url: https://github.com/sandeep-alluru/agentdelta/blob/main/LICENSE
+    url: https://github.com/sandeep-alluru/redline/blob/main/LICENSE
 
 servers:
   - url: http://localhost:8000

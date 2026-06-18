@@ -21,7 +21,7 @@ fmt:
 	ruff check --fix src/ tests/
 
 typecheck:
-	mypy src/agentdelta/
+	mypy src/redline/
 
 docs:
 	mkdocs serve

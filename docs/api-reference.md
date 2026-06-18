@@ -3,57 +3,57 @@
 ## Top-level exports
 
 ```python
-from agentdelta import AgentTrace, diff_traces, record
+from redline import AgentTrace, diff_traces, record
 ```
 
-::: agentdelta.trace.AgentTrace
+::: redline.trace.AgentTrace
 
-::: agentdelta.trace.TraceNode
+::: redline.trace.TraceNode
 
-::: agentdelta.trace.TraceEdge
+::: redline.trace.TraceEdge
 
-::: agentdelta.trace.NodeType
+::: redline.trace.NodeType
 
-::: agentdelta.trace.EdgeType
+::: redline.trace.EdgeType
 
 ---
 
 ## Diff
 
-::: agentdelta.diff.diff_traces
+::: redline.diff.diff_traces
 
-::: agentdelta.diff.DiffResult
+::: redline.diff.DiffResult
 
-::: agentdelta.diff.ForkPoint
+::: redline.diff.ForkPoint
 
-::: agentdelta.diff.StepDiff
+::: redline.diff.StepDiff
 
 ---
 
 ## Embeddings
 
-::: agentdelta.embed.embed_trace
+::: redline.embed.embed_trace
 
-::: agentdelta.embed.align_traces
+::: redline.embed.align_traces
 
-::: agentdelta.embed.cosine_similarity
+::: redline.embed.cosine_similarity
 
-::: agentdelta.embed.find_best_match
+::: redline.embed.find_best_match
 
 ---
 
 ## Instrumentation
 
-::: agentdelta.instrument.record
+::: redline.instrument.record
 
-::: agentdelta.instrument.AgentDeltaCallback
+::: redline.instrument.RedlineCallback
 
 ---
 
 ## Report
 
-::: agentdelta.report.print_diff
+::: redline.report.print_diff
 
-::: agentdelta.report.to_json
+::: redline.report.to_json
 
-::: agentdelta.report.to_markdown
+::: redline.report.to_markdown

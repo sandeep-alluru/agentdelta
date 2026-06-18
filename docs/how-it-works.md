@@ -15,7 +15,7 @@ Two agent runs can produce identical final answers while taking completely diffe
 
 ## The solution
 
-agentdelta gives every agent run a **behavioral fingerprint** and lets you compare two fingerprints.
+redline gives every agent run a **behavioral fingerprint** and lets you compare two fingerprints.
 
 ## Pipeline
 

@@ -1,5 +1,5 @@
 """
-End-to-end smoke test for agentdelta.
+End-to-end smoke test for redline.
 
 Simulates a user who just cloned the repo and wants to verify everything works.
 No mocking, no fixtures — real embeddings, real CLI, real HTTP server.
@@ -68,49 +68,49 @@ def run(name: str, fn):  # noqa: ANN001
 section("1. Package import")
 
 def _test_import_version():
-    import agentdelta
-    assert agentdelta.__version__, "__version__ is empty"
-    assert agentdelta.__version__ != "0.0.0"
+    import redline
+    assert redline.__version__, "__version__ is empty"
+    assert redline.__version__ != "0.0.0"
 
 def _test_import_public_api():
-    from agentdelta import AgentTrace, diff_traces, record
+    from redline import AgentTrace, diff_traces, record
     assert callable(diff_traces)
     assert callable(record)
 
 def _test_import_trace_types():
-    from agentdelta.trace import NodeType, EdgeType, TraceNode, TraceEdge, AgentTrace
+    from redline.trace import NodeType, EdgeType, TraceNode, TraceEdge, AgentTrace
     assert NodeType.LLM.value == "llm"
     assert EdgeType.TOOL_CALL.value == "tool_call"
 
 def _test_import_diff():
-    from agentdelta.diff import ForkPoint, DiffResult, StepDiff
+    from redline.diff import ForkPoint, DiffResult, StepDiff
     assert hasattr(DiffResult, "has_regression")
 
 def _test_import_instrument():
-    from agentdelta.instrument import AgentDeltaCallback, record
-    cb = AgentDeltaCallback(run_id="smoke-import")
+    from redline.instrument import RedlineCallback, record
+    cb = RedlineCallback(run_id="smoke-import")
     assert cb.run_id == "smoke-import"
 
-run("agentdelta package imports", _test_import_version)
+run("redline package imports", _test_import_version)
 run("Public API (AgentTrace, diff_traces, record)", _test_import_public_api)
 run("Trace types (NodeType, EdgeType, TraceNode)", _test_import_trace_types)
 run("Diff types (ForkPoint, DiffResult, StepDiff)", _test_import_diff)
-run("Instrumentation (AgentDeltaCallback, record)", _test_import_instrument)
+run("Instrumentation (RedlineCallback, record)", _test_import_instrument)
 
 # ── 2. Trace creation and JSONL round-trip ────────────────────────────────────
 
 section("2. Trace creation and JSONL round-trip")
 
-from agentdelta.trace import AgentTrace, NodeType, EdgeType, TraceNode, TraceEdge
+from redline.trace import AgentTrace, NodeType, EdgeType, TraceNode, TraceEdge
 
 def _build_weather_trace(run_id: str, tool: str) -> AgentTrace:
-    from agentdelta.instrument import AgentDeltaCallback
+    from redline.instrument import RedlineCallback
 
     class FakeLLMResponse:
         def __init__(self, text: str):
             self.generations = [[type("G", (), {"text": text})()]]
 
-    cb = AgentDeltaCallback(run_id=run_id)
+    cb = RedlineCallback(run_id=run_id)
     cb.on_chain_start({}, {"input": "What is the weather in Tokyo?"})
     cb.on_llm_end(FakeLLMResponse("I should look up the current weather in Tokyo."))
     cb.on_tool_start({"name": tool}, "location='Tokyo'" if tool == "get_weather" else "query='Tokyo weather today'")
@@ -154,7 +154,7 @@ def _test_trace_jsonl_format():
     assert json.loads(lines[-1])["type"] == "edge"
     path.unlink()
 
-run("Create trace with 6 nodes via AgentDeltaCallback", _test_trace_create)
+run("Create trace with 6 nodes via RedlineCallback", _test_trace_create)
 run("TraceNode.id is content-addressed (same content = same ID)", _test_trace_content_addressed_ids)
 run("AgentTrace.save() and .load() round-trip", _test_trace_save_load)
 run("JSONL format: first line trace_meta, last line edge", _test_trace_jsonl_format)
@@ -164,21 +164,21 @@ run("JSONL format: first line trace_meta, last line edge", _test_trace_jsonl_for
 section("3. Embedding and semantic diff")
 
 def _test_embed_trace():
-    from agentdelta.embed import embed_trace
+    from redline.embed import embed_trace
     trace = _build_weather_trace("embed-test", "get_weather")
     embed_trace(trace)
     assert all(n.embedding is not None for n in trace.nodes)
     assert len(trace.nodes[0].embedding) == 384
 
 def _test_cosine_similarity():
-    from agentdelta.embed import cosine_similarity
+    from redline.embed import cosine_similarity
     v = [1.0, 0.0, 0.0]
     assert cosine_similarity(v, v) == 1.0
     assert abs(cosine_similarity(v, [0.0, 1.0, 0.0])) < 0.01
     assert cosine_similarity([0.0] * 3, v) == 0.0
 
 def _test_diff_detects_fork():
-    from agentdelta import diff_traces
+    from redline import diff_traces
     trace_a = _build_weather_trace("baseline", "get_weather")
     trace_b = _build_weather_trace("candidate", "web_search")
     result = diff_traces(trace_a, trace_b, fork_threshold=0.70, match_threshold=0.85)
@@ -188,14 +188,14 @@ def _test_diff_detects_fork():
     assert "get_weather" in result.fork_point.description or "web_search" in result.fork_point.description
 
 def _test_diff_no_regression_identical():
-    from agentdelta import diff_traces
+    from redline import diff_traces
     trace_a = _build_weather_trace("v1", "get_weather")
     trace_b = _build_weather_trace("v2", "get_weather")
     result = diff_traces(trace_a, trace_b)
     assert not result.has_regression, "Identical traces should not have regression"
 
 def _test_diff_summary_fields():
-    from agentdelta import diff_traces
+    from redline import diff_traces
     trace_a = _build_weather_trace("s1", "get_weather")
     trace_b = _build_weather_trace("s2", "web_search")
     result = diff_traces(trace_a, trace_b)
@@ -214,14 +214,14 @@ run("DiffResult.summary has all required fields", _test_diff_summary_fields)
 
 section("4. Report formatters")
 
-from agentdelta import diff_traces
+from redline import diff_traces
 
 _trace_a = _build_weather_trace("report-a", "get_weather")
 _trace_b = _build_weather_trace("report-b", "web_search")
 _diff_result = diff_traces(_trace_a, _trace_b)
 
 def _test_to_json():
-    from agentdelta.report import to_json
+    from redline.report import to_json
     raw = to_json(_diff_result)
     parsed = json.loads(raw)
     assert parsed["summary"]["has_regression"] is True
@@ -229,14 +229,14 @@ def _test_to_json():
     assert parsed["fork_point"]["step_a"] >= 1
 
 def _test_to_markdown():
-    from agentdelta.report import to_markdown
+    from redline.report import to_markdown
     md = to_markdown(_diff_result)
-    assert "## agentdelta" in md or "agentdelta" in md
+    assert "## redline" in md or "redline" in md
     assert "REGRESSION" in md or "regression" in md.lower()
     assert "|" in md  # has a table
 
 def _test_print_diff_runs():
-    from agentdelta.report import print_diff
+    from redline.report import print_diff
     import io
     from rich.console import Console
     buf = io.StringIO()
@@ -251,7 +251,7 @@ run("print_diff() runs without error and outputs regression text", _test_print_d
 
 # ── 5. CLI ────────────────────────────────────────────────────────────────────
 
-section("5. CLI (agentdelta diff / inspect)")
+section("5. CLI (redline diff / inspect)")
 
 PYTHON = sys.executable
 
@@ -262,14 +262,14 @@ def _write_traces() -> tuple[Path, Path]:
     return td / "a.jsonl", td / "b.jsonl"
 
 def _test_cli_help():
-    r = subprocess.run([PYTHON, "-m", "agentdelta.cli", "--help"], capture_output=True, text=True)
+    r = subprocess.run([PYTHON, "-m", "redline.cli", "--help"], capture_output=True, text=True)
     assert r.returncode == 0
     assert "diff" in r.stdout
 
 def _test_cli_diff_rich():
     path_a, path_b = _write_traces()
     r = subprocess.run(
-        [PYTHON, "-m", "agentdelta.cli", "diff", str(path_a), str(path_b)],
+        [PYTHON, "-m", "redline.cli", "diff", str(path_a), str(path_b)],
         capture_output=True, text=True
     )
     assert r.returncode == 0
@@ -279,7 +279,7 @@ def _test_cli_diff_rich():
 def _test_cli_diff_json():
     path_a, path_b = _write_traces()
     r = subprocess.run(
-        [PYTHON, "-m", "agentdelta.cli", "diff", str(path_a), str(path_b), "--format", "json"],
+        [PYTHON, "-m", "redline.cli", "diff", str(path_a), str(path_b), "--format", "json"],
         capture_output=True, text=True
     )
     assert r.returncode == 0
@@ -290,7 +290,7 @@ def _test_cli_diff_json():
 def _test_cli_diff_markdown():
     path_a, path_b = _write_traces()
     r = subprocess.run(
-        [PYTHON, "-m", "agentdelta.cli", "diff", str(path_a), str(path_b), "--format", "markdown"],
+        [PYTHON, "-m", "redline.cli", "diff", str(path_a), str(path_b), "--format", "markdown"],
         capture_output=True, text=True
     )
     assert r.returncode == 0
@@ -299,7 +299,7 @@ def _test_cli_diff_markdown():
 def _test_cli_diff_exit_code_regression():
     path_a, path_b = _write_traces()
     r = subprocess.run(
-        [PYTHON, "-m", "agentdelta.cli", "diff", str(path_a), str(path_b), "--exit-code"],
+        [PYTHON, "-m", "redline.cli", "diff", str(path_a), str(path_b), "--exit-code"],
         capture_output=True, text=True
     )
     assert r.returncode == 1, f"Expected exit 1 for regression, got {r.returncode}"
@@ -310,7 +310,7 @@ def _test_cli_diff_exit_code_clean():
     path_b = Path(tempfile.mktemp(suffix=".jsonl"))
     _build_weather_trace("same-b", "get_weather").save(path_b)
     r = subprocess.run(
-        [PYTHON, "-m", "agentdelta.cli", "diff", str(path_a), str(path_b), "--exit-code"],
+        [PYTHON, "-m", "redline.cli", "diff", str(path_a), str(path_b), "--exit-code"],
         capture_output=True, text=True
     )
     assert r.returncode == 0, f"Expected exit 0 for no regression, got {r.returncode}"
@@ -318,32 +318,32 @@ def _test_cli_diff_exit_code_clean():
 def _test_cli_inspect():
     path_a, _ = _write_traces()
     r = subprocess.run(
-        [PYTHON, "-m", "agentdelta.cli", "inspect", str(path_a)],
+        [PYTHON, "-m", "redline.cli", "inspect", str(path_a)],
         capture_output=True, text=True
     )
     assert r.returncode == 0
     output = r.stdout + r.stderr
     assert "start" in output or "tool_call" in output or "llm" in output
 
-run("agentdelta --help returns 0", _test_cli_help)
-run("agentdelta diff (rich format) detects regression", _test_cli_diff_rich)
-run("agentdelta diff --format json returns valid JSON", _test_cli_diff_json)
-run("agentdelta diff --format markdown returns Markdown table", _test_cli_diff_markdown)
-run("agentdelta diff --exit-code exits 1 on regression", _test_cli_diff_exit_code_regression)
-run("agentdelta diff --exit-code exits 0 on clean traces", _test_cli_diff_exit_code_clean)
-run("agentdelta inspect outputs node types", _test_cli_inspect)
+run("redline --help returns 0", _test_cli_help)
+run("redline diff (rich format) detects regression", _test_cli_diff_rich)
+run("redline diff --format json returns valid JSON", _test_cli_diff_json)
+run("redline diff --format markdown returns Markdown table", _test_cli_diff_markdown)
+run("redline diff --exit-code exits 1 on regression", _test_cli_diff_exit_code_regression)
+run("redline diff --exit-code exits 0 on clean traces", _test_cli_diff_exit_code_clean)
+run("redline inspect outputs node types", _test_cli_inspect)
 
 # ── 6. FastAPI server ─────────────────────────────────────────────────────────
 
-section("6. FastAPI server (agentdelta[api])")
+section("6. FastAPI server (redline[api])")
 
 def _test_api_import():
-    from agentdelta.api import app
-    assert app.title == "agentdelta API"
+    from redline.api import app
+    assert app.title == "redline API"
 
 def _test_api_health():
     from fastapi.testclient import TestClient
-    from agentdelta.api import app
+    from redline.api import app
     client = TestClient(app)
     r = client.get("/health")
     assert r.status_code == 200
@@ -352,7 +352,7 @@ def _test_api_health():
 
 def _test_api_diff_endpoint():
     from fastapi.testclient import TestClient
-    from agentdelta.api import app
+    from redline.api import app
 
     def _trace_to_str(trace) -> str:
         path = Path(tempfile.mktemp(suffix=".jsonl"))
@@ -373,7 +373,7 @@ def _test_api_diff_endpoint():
 
 def _test_api_inspect_endpoint():
     from fastapi.testclient import TestClient
-    from agentdelta.api import app
+    from redline.api import app
 
     path = Path(tempfile.mktemp(suffix=".jsonl"))
     _build_weather_trace("api-inspect", "get_weather").save(path)
@@ -387,23 +387,23 @@ def _test_api_inspect_endpoint():
     assert data["run_id"] == "api-inspect"
     assert data["total_nodes"] == 6
 
-run("agentdelta.api imports and app.title is correct", _test_api_import)
+run("redline.api imports and app.title is correct", _test_api_import)
 run("GET /health returns {status: ok, version: ...}", _test_api_health)
 run("POST /diff detects regression between two traces", _test_api_diff_endpoint)
 run("POST /inspect returns run_id and node count", _test_api_inspect_endpoint)
 
 # ── 7. MCP server ─────────────────────────────────────────────────────────────
 
-section("7. MCP server (agentdelta[mcp])")
+section("7. MCP server (redline[mcp])")
 
 def _test_mcp_server_importable():
-    import agentdelta.mcp_server as m
+    import redline.mcp_server as m
     assert hasattr(m, "run_server")
 
 def _test_mcp_server_graceful_fail_without_mcp():
     # mcp package is likely not installed — _require_mcp() should fail with SystemExit
     # but the module itself must import cleanly
-    import agentdelta.mcp_server  # noqa: F401 — just checking it loads
+    import redline.mcp_server  # noqa: F401 — just checking it loads
 
 run("mcp_server.py imports without error", _test_mcp_server_importable)
 run("mcp_server module loads cleanly (no import-time crash)", _test_mcp_server_graceful_fail_without_mcp)
@@ -450,7 +450,7 @@ run("AGENTS.md exists and non-empty", lambda: _check_file_nonempty("AGENTS.md"))
 run("CLAUDE.md exists and non-empty", lambda: _check_file_nonempty("CLAUDE.md"))
 run("CODEX.md exists and non-empty", lambda: _check_file_nonempty("CODEX.md"))
 run(".github/copilot-instructions.md exists", lambda: _check_file_nonempty(".github/copilot-instructions.md"))
-run(".cursor/rules/ has at least one .mdc file", lambda: _check_file_nonempty(".cursor/rules/agentdelta.mdc"))
+run(".cursor/rules/ has at least one .mdc file", lambda: _check_file_nonempty(".cursor/rules/redline.mdc"))
 run(".windsurfrules exists", lambda: _check_file_nonempty(".windsurfrules"))
 run(".aider.conf.yml exists", lambda: _check_file_nonempty(".aider.conf.yml"))
 run(".continue/config.json is valid JSON", lambda: _check_json_valid(".continue/config.json"))
@@ -509,7 +509,7 @@ if failed:
         print(f"    {YELLOW}→ {short}{RESET}")
     print(f"\n{YELLOW}Tip: run with --verbose for full tracebacks{RESET}")
 else:
-    print(f"{GREEN}All {total} checks passed — agentdelta is ready to ship{RESET}")
+    print(f"{GREEN}All {total} checks passed — redline is ready to ship{RESET}")
 
 print(f"{'═'*60}\n")
 sys.exit(0 if not failed else 1)

@@ -1,4 +1,4 @@
-Scaffold a new instrumentation adapter for a framework not yet supported by agentdelta.
+Scaffold a new instrumentation adapter for a framework not yet supported by redline.
 
 Usage: /project:add-adapter <framework_name>
 
@@ -6,13 +6,13 @@ Framework name from $ARGUMENTS (e.g. "autogen", "crewai", "smolagents", "pydanti
 
 Generate the following:
 
-1. `src/agentdelta/instrument_<framework>.py` — adapter module:
-   - A class `<Framework>AgentDeltaAdapter` that wraps the framework's event/callback API
+1. `src/redline/instrument_<framework>.py` — adapter module:
+   - A class `<Framework>RedlineAdapter` that wraps the framework's event/callback API
    - Must emit `TraceNode` objects to an `AgentTrace` for each: agent start, LLM call, tool call, tool return, agent end
    - Use `NodeType.START`, `NodeType.LLM`, `NodeType.TOOL_CALL`, `NodeType.TOOL_RETURN`, `NodeType.END`
    - Include a `record_<framework>()` context manager mirroring the LangChain `record()` API
 
-2. Export from `src/agentdelta/__init__.py`:
+2. Export from `src/redline/__init__.py`:
    - Add to `__all__` alphabetically
 
 3. `tests/test_instrument_<framework>.py` — at least 3 tests:
@@ -26,7 +26,7 @@ Generate the following:
    - Add `[<framework>]` extra with the framework package pinned to `>=` minimum supported version
 
 Context:
-- See `src/agentdelta/instrument.py` for the LangChain reference implementation
+- See `src/redline/instrument.py` for the LangChain reference implementation
 - AgentTrace.add_node() and add_edge() are the only write methods needed
 - Keep content fields under 2000 chars for LLM nodes, 500 chars for tool nodes
-- The adapter does NOT need to import agentdelta internals other than trace.py
+- The adapter does NOT need to import redline internals other than trace.py

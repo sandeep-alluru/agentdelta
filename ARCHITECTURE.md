@@ -1,11 +1,11 @@
 # Architecture
 
-agentdelta is a pure-Python library with five independent modules and a thin CLI layer.
+redline is a pure-Python library with five independent modules and a thin CLI layer.
 
 ## Module map
 
 ```
-src/agentdelta/
+src/redline/
 ├── trace.py        # Data model: TraceNode, TraceEdge, AgentTrace
 ├── embed.py        # Embedding + sliding-window alignment
 ├── diff.py         # Fork detection algorithm → DiffResult
@@ -20,7 +20,7 @@ src/agentdelta/
 Agent run
     │
     ▼  (instrument.py)
-AgentDeltaCallback
+RedlineCallback
     │  hooks: on_llm_end, on_tool_start, on_tool_end,
     │         on_chain_start, on_chain_end
     ▼

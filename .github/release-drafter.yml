@@ -55,4 +55,4 @@ template: |
 
   $CHANGES
 
-  **Full Changelog**: https://github.com/sandeep-alluru/agentdelta/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+  **Full Changelog**: https://github.com/sandeep-alluru/redline/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
