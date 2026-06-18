@@ -1,11 +1,11 @@
 # CLI Reference
 
-## `redline diff`
+## `agentdelta diff`
 
 Compare two agent trace files and report any behavioral regression.
 
 ```bash
-redline diff TRACE_A TRACE_B [OPTIONS]
+agentdelta diff TRACE_A TRACE_B [OPTIONS]
 ```
 
 | Option | Default | Description |
@@ -20,34 +20,34 @@ redline diff TRACE_A TRACE_B [OPTIONS]
 
 ```bash
 # Default rich terminal output
-redline diff baseline.jsonl candidate.jsonl
+agentdelta diff baseline.jsonl candidate.jsonl
 
 # JSON output for programmatic use
-redline diff baseline.jsonl candidate.jsonl --format json
+agentdelta diff baseline.jsonl candidate.jsonl --format json
 
 # Markdown for a GitHub PR comment
-redline diff baseline.jsonl candidate.jsonl --format markdown > diff.md
+agentdelta diff baseline.jsonl candidate.jsonl --format markdown > diff.md
 
 # CI gate — fails the pipeline if traces diverged
-redline diff baseline.jsonl candidate.jsonl --exit-code
+agentdelta diff baseline.jsonl candidate.jsonl --exit-code
 
 # Show all steps including unchanged ones
-redline diff baseline.jsonl candidate.jsonl --show-matches
+agentdelta diff baseline.jsonl candidate.jsonl --show-matches
 
 # Tighter thresholds (stricter regression detection)
-redline diff baseline.jsonl candidate.jsonl \
+agentdelta diff baseline.jsonl candidate.jsonl \
   --fork-threshold 0.80 \
   --match-threshold 0.90
 ```
 
 ---
 
-## `redline inspect`
+## `agentdelta inspect`
 
 Print a step-by-step summary of a single trace file.
 
 ```bash
-redline inspect TRACE_FILE
+agentdelta inspect TRACE_FILE
 ```
 
 No options. Outputs a table of steps with node type, content preview, and node ID.
@@ -55,7 +55,7 @@ No options. Outputs a table of steps with node type, content preview, and node I
 ### Example
 
 ```bash
-redline inspect baseline.jsonl
+agentdelta inspect baseline.jsonl
 ```
 
 ```

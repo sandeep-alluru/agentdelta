@@ -3,19 +3,19 @@
 ## Install
 
 ```bash
-pip install redline
+pip install agentdelta
 ```
 
 With LangChain/LangGraph instrumentation:
 
 ```bash
-pip install "redline[langchain]"
+pip install "agentdelta[langchain]"
 ```
 
 Zero-install (no virtualenv):
 
 ```bash
-pipx run redline --help
+pipx run agentdelta --help
 ```
 
 ## Step 1 — Record two runs
@@ -23,7 +23,7 @@ pipx run redline --help
 === "LangChain / LangGraph"
 
     ```python
-    from redline import record
+    from agentdelta import record
 
     # Baseline (before your change)
     with record("baseline.jsonl", run_id="v1.0") as cb:
@@ -37,8 +37,8 @@ pipx run redline --help
 === "Custom / Any Framework"
 
     ```python
-    from redline import AgentTrace
-    from redline.trace import TraceNode, NodeType
+    from agentdelta import AgentTrace
+    from agentdelta.trace import TraceNode, NodeType
 
     trace = AgentTrace(run_id="my_run")
     trace.add_node(TraceNode(step=1, node_type=NodeType.START,       content="user input"))
@@ -52,14 +52,14 @@ pipx run redline --help
 ## Step 2 — Diff the traces
 
 ```bash
-redline diff baseline.jsonl candidate.jsonl
+agentdelta diff baseline.jsonl candidate.jsonl
 ```
 
 Example output when a tool selection changed:
 
 ```
 ╭───────────────────────────────────────────────╮
-│ redline  v1.0 vs v1.1                      │
+│ agentdelta  v1.0 vs v1.1                      │
 ╰───────────────────────────────────────────────╯
   🔴 REGRESSION DETECTED  3/6 steps matched (50.0%)  1 changed  +1 added  -1 removed
 
@@ -78,7 +78,7 @@ Example output when traces are equivalent:
 
 ```
 ╭───────────────────────────────────────────────╮
-│ redline  v1.0 vs v1.1                      │
+│ agentdelta  v1.0 vs v1.1                      │
 ╰───────────────────────────────────────────────╯
   ✅ No regression  6/6 steps matched (100.0%)
 ```
@@ -86,21 +86,21 @@ Example output when traces are equivalent:
 ## Step 3 — Use in CI
 
 ```bash
-redline diff baseline.jsonl candidate.jsonl --exit-code
+agentdelta diff baseline.jsonl candidate.jsonl --exit-code
 # exits 1 if regression detected, 0 if clean
 ```
 
 ## Step 4 — Inspect a single trace
 
 ```bash
-redline inspect baseline.jsonl
+agentdelta inspect baseline.jsonl
 ```
 
 ## Python API
 
 ```python
-from redline import AgentTrace, diff_traces
-from redline.report import print_diff, to_json, to_markdown
+from agentdelta import AgentTrace, diff_traces
+from agentdelta.report import print_diff, to_json, to_markdown
 
 trace_a = AgentTrace.load("baseline.jsonl")
 trace_b = AgentTrace.load("candidate.jsonl")

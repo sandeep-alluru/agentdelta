@@ -8,16 +8,16 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-from redline.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
+from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
 
 
-class RedlineCallback:
+class AgentdeltaCallback:
     """
     LangChain BaseCallbackHandler-compatible callback that records agent runs
     as AgentTrace objects.
 
     Usage:
-        callback = RedlineCallback()
+        callback = AgentdeltaCallback()
         agent.invoke({"input": "..."}, config={"callbacks": [callback]})
         trace = callback.trace
         trace.save("run.jsonl")
@@ -124,16 +124,16 @@ class RedlineCallback:
 
 
 @contextlib.contextmanager
-def record(output_path: str | Path, run_id: str | None = None) -> Iterator[RedlineCallback]:
+def record(output_path: str | Path, run_id: str | None = None) -> Iterator[AgentdeltaCallback]:
     """
     Context manager that records an agent run and saves the trace on exit.
 
     Usage:
-        with redline.record("run_a.jsonl") as cb:
+        with agentdelta.record("run_a.jsonl") as cb:
             agent.invoke({"input": "..."}, config={"callbacks": [cb]})
         # trace_a.jsonl is now saved
     """
-    callback = RedlineCallback(run_id=run_id)
+    callback = AgentdeltaCallback(run_id=run_id)
     try:
         yield callback
     finally:

@@ -1,4 +1,4 @@
-"""Command-line interface for redline."""
+"""Command-line interface for agentdelta."""
 
 from __future__ import annotations
 
@@ -7,13 +7,13 @@ from pathlib import Path
 
 import click
 
-from redline.diff import diff_traces
-from redline.report import print_diff, to_json, to_markdown
-from redline.trace import AgentTrace
+from agentdelta.diff import diff_traces
+from agentdelta.report import print_diff, to_json, to_markdown
+from agentdelta.trace import AgentTrace
 
 
 @click.group()
-@click.version_option(package_name="redline")
+@click.version_option(package_name="agentdelta")
 def main() -> None:
     """Semantic diff engine for AI agent behavior traces."""
 
@@ -98,7 +98,7 @@ def inspect(trace_file: Path, run_id: str | None) -> None:
     from rich.console import Console
     from rich.table import Table
 
-    from redline.trace import NodeType
+    from agentdelta.trace import NodeType
 
     _NODE_ICONS = {
         NodeType.START: "▶",

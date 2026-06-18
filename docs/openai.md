@@ -28,8 +28,8 @@ The `openapi.yaml` at repo root is a complete OpenAPI 3.1 spec for a REST wrappe
 ### Run the server locally
 
 ```bash
-pip install "redline[api]"
-uvicorn redline.api:app --reload
+pip install "agentdelta[api]"
+uvicorn agentdelta.api:app --reload
 # Server at http://localhost:8000
 # Docs at  http://localhost:8000/docs
 ```

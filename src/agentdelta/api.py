@@ -1,7 +1,7 @@
-"""FastAPI REST wrapper for redline.
+"""FastAPI REST wrapper for agentdelta.
 
-Start with: uvicorn redline.api:app --reload
-Install:    pip install "redline[api]"
+Start with: uvicorn agentdelta.api:app --reload
+Install:    pip install "agentdelta[api]"
 
 Implements the openapi.yaml contract:
     POST /diff      — compare two JSONL traces
@@ -21,18 +21,18 @@ try:
     from pydantic import BaseModel, Field
 except ImportError as exc:
     raise ImportError(
-        "API server requires: pip install 'redline[api]'"
+        "API server requires: pip install 'agentdelta[api]'"
     ) from exc
 
-from redline import AgentTrace, diff_traces
-from redline.report import to_json
-from redline.trace import NodeType
+from agentdelta import AgentTrace, diff_traces
+from agentdelta.report import to_json
+from agentdelta.trace import NodeType
 
 app = FastAPI(
-    title="redline API",
+    title="agentdelta API",
     description="Semantic diff engine for AI agent behavior.",
     version="0.1.0",
-    license_info={"name": "MIT", "url": "https://github.com/sandeep-alluru/redline/blob/main/LICENSE"},
+    license_info={"name": "MIT", "url": "https://github.com/sandeep-alluru/agentdelta/blob/main/LICENSE"},
 )
 
 
@@ -63,7 +63,7 @@ def _load_trace_from_string(content: str, name: str) -> AgentTrace:
     tmp_path: str | None = None
     try:
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False, prefix=f"redline_{name}_"
+            mode="w", suffix=".jsonl", delete=False, prefix=f"agentdelta_{name}_"
         ) as f:
             f.write(content)
             tmp_path = f.name
@@ -81,7 +81,7 @@ def _load_trace_from_string(content: str, name: str) -> AgentTrace:
 @app.get("/health", response_model=HealthResponse)
 async def health() -> dict[str, str]:
     """Liveness probe."""
-    from redline import __version__
+    from agentdelta import __version__
     return {"status": "ok", "version": __version__}
 
 

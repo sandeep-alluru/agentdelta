@@ -16,14 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sliding-window trace alignment via cosine similarity
 - `diff_traces()` — finds first semantic fork point between two runs
 - `ForkPoint` with human-readable divergence description
-- `RedlineCallback` — LangChain/LangGraph-compatible callback handler
+- `AgentdeltaCallback` — LangChain/LangGraph-compatible callback handler
 - `record()` context manager for one-line trace capture
 - Rich terminal output (`print_diff`)
 - JSON output (`to_json`) for programmatic consumption
 - Markdown output (`to_markdown`) for GitHub PR comments
-- CLI: `redline diff` and `redline inspect`
+- CLI: `agentdelta diff` and `agentdelta inspect`
 - GitHub Actions workflow for CI + behavioral diff PR comments
 - 43 unit tests across all modules, 87% branch coverage
 
-[Unreleased]: https://github.com/sandeep-alluru/redline/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/sandeep-alluru/redline/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sandeep-alluru/agentdelta/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sandeep-alluru/agentdelta/releases/tag/v0.1.0

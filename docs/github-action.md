@@ -1,6 +1,6 @@
 # GitHub Action
 
-Use redline in your GitHub Actions workflow to automatically detect behavioral regressions on every PR.
+Use agentdelta in your GitHub Actions workflow to automatically detect behavioral regressions on every PR.
 
 ## Setup
 
@@ -25,7 +25,7 @@ jobs:
         run: python scripts/run_agent.py --output traces/candidate.jsonl
 
       - name: Behavioral diff
-        uses: sandeep-alluru/redline@v0.1.0
+        uses: sandeep-alluru/agentdelta@v0.1.0
         with:
           baseline: traces/baseline.jsonl
           candidate: traces/candidate.jsonl
@@ -35,18 +35,18 @@ jobs:
         if: always()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          path: redline-diff.md
+          path: agentdelta-diff.md
 ```
 
 ### Option B — Use the CLI directly
 
 ```yaml
-- name: Install redline
-  run: pip install redline
+- name: Install agentdelta
+  run: pip install agentdelta
 
 - name: Behavioral diff
   run: |
-    redline diff traces/baseline.jsonl traces/candidate.jsonl \
+    agentdelta diff traces/baseline.jsonl traces/candidate.jsonl \
       --format markdown --exit-code > diff.md
 
 - name: Post comment
@@ -73,7 +73,7 @@ jobs:
 | `has-regression` | `"true"` or `"false"` |
 | `fork-step` | Step number of the first fork (or empty) |
 | `similarity-pct` | Percentage of steps that matched |
-| `diff-file` | Path to the generated `redline-diff.md` |
+| `diff-file` | Path to the generated `agentdelta-diff.md` |
 
 ## Storing baseline traces
 

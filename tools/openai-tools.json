@@ -3,7 +3,7 @@
     "type": "function",
     "function": {
       "name": "diff_traces",
-      "description": "Compare two redline JSONL trace files to detect behavioral regressions. Returns a DiffResult with the first fork point (divergent step), per-step alignment, and summary statistics. Use this to check whether a prompt change, model upgrade, or tool swap changed how an agent reasons.",
+      "description": "Compare two agentdelta JSONL trace files to detect behavioral regressions. Returns a DiffResult with the first fork point (divergent step), per-step alignment, and summary statistics. Use this to check whether a prompt change, model upgrade, or tool swap changed how an agent reasons.",
       "strict": true,
       "parameters": {
         "type": "object",
@@ -34,7 +34,7 @@
     "type": "function",
     "function": {
       "name": "inspect_trace",
-      "description": "Summarise a single redline JSONL trace file. Returns the run_id, total node and edge count, and a step-by-step breakdown with node type and content preview for each step.",
+      "description": "Summarise a single agentdelta JSONL trace file. Returns the run_id, total node and edge count, and a step-by-step breakdown with node type and content preview for each step.",
       "strict": true,
       "parameters": {
         "type": "object",
@@ -53,7 +53,7 @@
     "type": "function",
     "function": {
       "name": "record_snippet",
-      "description": "Return a ready-to-paste Python code snippet to record an agent run with redline for a given framework.",
+      "description": "Return a ready-to-paste Python code snippet to record an agent run with agentdelta for a given framework.",
       "strict": true,
       "parameters": {
         "type": "object",

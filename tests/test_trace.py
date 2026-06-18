@@ -1,4 +1,4 @@
-"""Tests for redline.trace."""
+"""Tests for agentdelta.trace."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from redline.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
+from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
 
 
 def test_node_id_is_deterministic():

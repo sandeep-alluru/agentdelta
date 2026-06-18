@@ -22,6 +22,6 @@ to remain anonymous.
 
 ## Scope
 
-redline processes local trace files and runs sentence-transformer inference.
+agentdelta processes local trace files and runs sentence-transformer inference.
 It does not make network requests except to download the `all-MiniLM-L6-v2`
 model on first use. It does not store or transmit trace data externally.

@@ -1,12 +1,12 @@
-# aider configuration for redline
+# aider configuration for agentdelta
 # https://aider.chat/docs/config/aider_conf.html
 
 # Always include these files for architectural context
 read:
   - ARCHITECTURE.md
   - CLAUDE.md
-  - src/redline/trace.py
-  - src/redline/diff.py
+  - src/agentdelta/trace.py
+  - src/agentdelta/diff.py
 
 # Auto-lint after edits
 lint: true

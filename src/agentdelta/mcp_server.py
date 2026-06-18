@@ -1,14 +1,14 @@
-"""MCP server exposing redline as Claude tools.
+"""MCP server exposing agentdelta as Claude tools.
 
-Start with: python -m redline.mcp_server
-Or via CLI: redline mcp
+Start with: python -m agentdelta.mcp_server
+Or via CLI: agentdelta mcp
 
 Add to Claude Desktop (~/.config/claude/claude_desktop_config.json):
     {
         "mcpServers": {
-            "redline": {
+            "agentdelta": {
                 "command": "python",
-                "args": ["-m", "redline.mcp_server"]
+                "args": ["-m", "agentdelta.mcp_server"]
             }
         }
     }
@@ -34,7 +34,7 @@ def _require_mcp() -> Any:
         return mcp, types, Server
     except ImportError:
         print(
-            "MCP server requires: pip install 'redline[mcp]'",
+            "MCP server requires: pip install 'agentdelta[mcp]'",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -43,8 +43,8 @@ def _require_mcp() -> Any:
 def _diff(
     path_a: str, path_b: str, fork_threshold: float, match_threshold: float
 ) -> dict[str, Any]:
-    from redline import AgentTrace, diff_traces
-    from redline.report import to_json
+    from agentdelta import AgentTrace, diff_traces
+    from agentdelta.report import to_json
 
     trace_a = AgentTrace.load(path_a)
     trace_b = AgentTrace.load(path_b)
@@ -55,7 +55,7 @@ def _diff(
 
 
 def _inspect(path: str) -> dict[str, Any]:
-    from redline import AgentTrace
+    from agentdelta import AgentTrace
 
     trace = AgentTrace.load(path)
     steps = []
@@ -77,7 +77,7 @@ def _inspect(path: str) -> dict[str, Any]:
 
 _RECORD_SNIPPETS = {
     "langchain": '''\
-from redline import record
+from agentdelta import record
 
 with record("baseline.jsonl", run_id="v1.0") as cb:
     agent.invoke({"input": "..."}, config={"callbacks": [cb]})
@@ -86,8 +86,8 @@ with record("candidate.jsonl", run_id="v1.1") as cb:
     agent.invoke({"input": "..."}, config={"callbacks": [cb]})
 ''',
     "custom": '''\
-from redline import AgentTrace
-from redline.trace import TraceNode, NodeType
+from agentdelta import AgentTrace
+from agentdelta.trace import TraceNode, NodeType
 
 trace = AgentTrace(run_id="my_run")
 trace.add_node(TraceNode(step=1, node_type=NodeType.START, content="user input"))
@@ -104,7 +104,7 @@ def run_server() -> None:
     """Start the MCP server on stdio."""
     mcp_mod, types, Server = _require_mcp()
 
-    server = Server("redline")
+    server = Server("agentdelta")
 
     @server.list_tools()
     async def list_tools() -> list[types.Tool]:
@@ -112,7 +112,7 @@ def run_server() -> None:
             types.Tool(
                 name="diff_traces",
                 description=(
-                    "Compare two redline JSONL trace files. Returns a DiffResult JSON with "
+                    "Compare two agentdelta JSONL trace files. Returns a DiffResult JSON with "
                     "fork_point (first divergent step), has_regression bool, and per-step details."
                 ),
                 inputSchema={
@@ -135,7 +135,7 @@ def run_server() -> None:
             types.Tool(
                 name="inspect_trace",
                 description=(
-                    "Summarise a single redline JSONL trace file: run_id, node count, "
+                    "Summarise a single agentdelta JSONL trace file: run_id, node count, "
                     "step sequence with type and content preview."
                 ),
                 inputSchema={
@@ -149,7 +149,7 @@ def run_server() -> None:
             types.Tool(
                 name="record_snippet",
                 description=(
-                    "Return a copy-paste Python snippet to record an agent run with redline."
+                    "Return a copy-paste Python snippet to record an agent run with agentdelta."
                 ),
                 inputSchema={
                     "type": "object",

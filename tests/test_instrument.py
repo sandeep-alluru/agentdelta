@@ -1,12 +1,12 @@
-"""Tests for redline.instrument."""
+"""Tests for agentdelta.instrument."""
 
 from __future__ import annotations
 
 import tempfile
 from pathlib import Path
 
-from redline.instrument import RedlineCallback, record
-from redline.trace import AgentTrace, NodeType
+from agentdelta.instrument import AgentdeltaCallback, record
+from agentdelta.trace import AgentTrace, NodeType
 
 
 class _FakeLLMResponse:
@@ -20,7 +20,7 @@ class _FakeGeneration:
 
 
 def test_callback_records_llm_node():
-    cb = RedlineCallback(run_id="test")
+    cb = AgentdeltaCallback(run_id="test")
     cb.on_llm_end(_FakeLLMResponse("I should search for this."))
     assert len(cb.trace.nodes) == 1
     assert cb.trace.nodes[0].node_type == NodeType.LLM
@@ -28,7 +28,7 @@ def test_callback_records_llm_node():
 
 
 def test_callback_records_tool_nodes():
-    cb = RedlineCallback(run_id="test")
+    cb = AgentdeltaCallback(run_id="test")
     cb.on_tool_start({"name": "web_search"}, "query='foo'")
     cb.on_tool_end("result: bar")
     nodes = cb.trace.nodes
@@ -38,14 +38,14 @@ def test_callback_records_tool_nodes():
 
 
 def test_callback_creates_start_on_chain_start():
-    cb = RedlineCallback(run_id="test")
+    cb = AgentdeltaCallback(run_id="test")
     cb.on_chain_start({}, {"input": "hello"})
     assert len(cb.trace.nodes) == 1
     assert cb.trace.nodes[0].node_type == NodeType.START
 
 
 def test_callback_no_duplicate_start():
-    cb = RedlineCallback(run_id="test")
+    cb = AgentdeltaCallback(run_id="test")
     cb.on_chain_start({}, {"input": "hello"})
     cb.on_chain_start({}, {"input": "hello again"})
     starts = [n for n in cb.trace.nodes if n.node_type == NodeType.START]
@@ -53,7 +53,7 @@ def test_callback_no_duplicate_start():
 
 
 def test_callback_records_end_on_chain_end():
-    cb = RedlineCallback(run_id="test")
+    cb = AgentdeltaCallback(run_id="test")
     cb.on_chain_start({}, {"input": "hello"})
     cb.on_chain_end({"output": "done"})
     ends = [n for n in cb.trace.nodes if n.node_type == NodeType.END]
@@ -61,7 +61,7 @@ def test_callback_records_end_on_chain_end():
 
 
 def test_callback_edges_connect_steps():
-    cb = RedlineCallback(run_id="test")
+    cb = AgentdeltaCallback(run_id="test")
     cb.on_chain_start({}, {"input": "hello"})
     cb.on_llm_end(_FakeLLMResponse("thinking"))
     cb.on_tool_start({"name": "search"}, "query='x'")

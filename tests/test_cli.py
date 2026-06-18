@@ -1,4 +1,4 @@
-"""Tests for redline CLI (redline diff, redline inspect)."""
+"""Tests for agentdelta CLI (agentdelta diff, agentdelta inspect)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from redline.cli import main
+from agentdelta.cli import main
 
 
 def _save_traces(simple_trace_a, simple_trace_b_match):
@@ -26,7 +26,7 @@ def test_diff_rich_output(simple_trace_a, simple_trace_b_match):
     path_a, path_b = _save_traces(simple_trace_a, simple_trace_b_match)
     result = runner.invoke(main, ["diff", str(path_a), str(path_b)])
     assert result.exit_code == 0
-    assert "redline" in result.output
+    assert "agentdelta" in result.output
 
 
 def test_diff_json_output(simple_trace_a, simple_trace_b_match):
@@ -44,7 +44,7 @@ def test_diff_markdown_output(simple_trace_a, simple_trace_b_match):
     path_a, path_b = _save_traces(simple_trace_a, simple_trace_b_match)
     result = runner.invoke(main, ["diff", str(path_a), str(path_b), "--format", "markdown"])
     assert result.exit_code == 0
-    assert "## redline behavior diff" in result.output
+    assert "## agentdelta behavior diff" in result.output
 
 
 def test_diff_exit_code_no_regression(simple_trace_a):

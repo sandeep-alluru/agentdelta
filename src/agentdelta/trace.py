@@ -1,4 +1,4 @@
-"""Core trace data model for redline."""
+"""Core trace data model for agentdelta."""
 
 from __future__ import annotations
 

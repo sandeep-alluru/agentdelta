@@ -1,4 +1,4 @@
-# Contributing to redline
+# Contributing to agentdelta
 
 Thank you for your interest in contributing. This guide covers everything you need to go from zero to a merged PR.
 
@@ -17,8 +17,8 @@ Thank you for your interest in contributing. This guide covers everything you ne
 ## Quick start
 
 ```bash
-git clone https://github.com/sandeep-alluru/redline
-cd redline
+git clone https://github.com/sandeep-alluru/agentdelta
+cd agentdelta
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pre-commit install
@@ -38,22 +38,22 @@ Or individually:
 ```bash
 pytest tests/ -v
 ruff check src/ tests/
-mypy src/redline/
+mypy src/agentdelta/
 ```
 
 ## Adding a new output format
 
-1. Add a `to_<format>(result: DiffResult) -> str` function in `src/redline/report.py`
-2. Add the format name to the `--format` choice in `src/redline/cli.py`
+1. Add a `to_<format>(result: DiffResult) -> str` function in `src/agentdelta/report.py`
+2. Add the format name to the `--format` choice in `src/agentdelta/cli.py`
 3. Add a `test_to_<format>_*` test in `tests/test_report.py`
 4. Add an example to `examples/` if the format is non-trivial
 5. Document it in the `## Output formats` section of the README
 
 ## Adding a new instrumentation adapter
 
-1. Create `src/redline/<framework>_adapter.py`
+1. Create `src/agentdelta/<framework>_adapter.py`
 2. Implement a callback/decorator/hook that emits `TraceNode` and `TraceEdge` objects
-3. Export the class from `src/redline/__init__.py`
+3. Export the class from `src/agentdelta/__init__.py`
 4. Add tests in `tests/test_<framework>_adapter.py`
 5. Add the framework to the `[project.optional-dependencies]` section in `pyproject.toml`
 

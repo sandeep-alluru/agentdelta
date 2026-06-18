@@ -1,4 +1,4 @@
-# redline
+# agentdelta
 
 **`git diff` for how your AI agent thinks.**
 
@@ -8,20 +8,20 @@ Detect the exact step where two agent runs diverged — which tool it switched t
 
 !!! note "Evaluates behavior, not output"
     Two runs can produce identical final answers while the agent took completely different paths —
-    calling different tools, in different orders, with different reasoning chains. redline catches that.
+    calling different tools, in different orders, with different reasoning chains. agentdelta catches that.
 
 ## Install
 
 ```bash
-pip install redline
+pip install agentdelta
 # with LangChain support
-pip install "redline[langchain]"
+pip install "agentdelta[langchain]"
 ```
 
 ## Quick example
 
 ```python
-from redline import record
+from agentdelta import record
 
 # Baseline (before your change)
 with record("baseline.jsonl", run_id="v1.0") as cb:
@@ -33,7 +33,7 @@ with record("candidate.jsonl", run_id="v1.1") as cb:
 ```
 
 ```bash
-redline diff baseline.jsonl candidate.jsonl
+agentdelta diff baseline.jsonl candidate.jsonl
 ```
 
 ```
@@ -50,7 +50,7 @@ Most LLM evaluations check: *did the agent get the right answer?* They miss the 
 - **Model upgrades change behavior** — moving from GPT-4o-mini to GPT-4o changes reasoning paths even when benchmark scores stay flat
 - **Tool-calling regressions are silent** — an agent that starts calling `web_search` instead of `read_database` may produce correct answers today and fail tomorrow
 
-redline gives every agent deployment a **behavioral fingerprint** so you can detect divergence in CI before it reaches production.
+agentdelta gives every agent deployment a **behavioral fingerprint** so you can detect divergence in CI before it reaches production.
 
 ## How it works
 

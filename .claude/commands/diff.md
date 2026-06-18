@@ -1,9 +1,9 @@
-Diff two redline trace files and report any behavioral regression.
+Diff two agentdelta trace files and report any behavioral regression.
 
 Usage: /project:diff <baseline.jsonl> <candidate.jsonl> [--format rich|json|markdown] [--exit-code]
 
 Steps:
-1. Run: `redline diff $ARGUMENTS`
+1. Run: `agentdelta diff $ARGUMENTS`
 2. Parse the output:
    - "REGRESSION DETECTED" → a ForkPoint was found; show the fork step, tool change, and similarity score
    - "No regression" → traces are equivalent; show match percentage

@@ -10,19 +10,19 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from redline.diff import diff_traces
-from redline.instrument import RedlineCallback
-from redline.report import print_diff, to_markdown
-from redline.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
+from agentdelta.diff import diff_traces
+from agentdelta.instrument import AgentdeltaCallback
+from agentdelta.report import print_diff, to_markdown
+from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
 
 
 def _build_trace(run_id: str, use_weather_tool: bool) -> AgentTrace:
     """Build a synthetic weather-query trace.
 
     One variant uses `get_weather`, the other uses `web_search` — this
-    is the fork that redline should detect.
+    is the fork that agentdelta should detect.
     """
-    cb = RedlineCallback(run_id=run_id)
+    cb = AgentdeltaCallback(run_id=run_id)
     cb.on_chain_start({}, {"input": "What is the weather in Tokyo?"})
     cb.on_llm_end(
         _FakeLLMResponse("I should look up the current weather in Tokyo.")

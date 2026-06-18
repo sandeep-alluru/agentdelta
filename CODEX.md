@@ -1,24 +1,24 @@
-# redline — Codex Developer Guide
+# agentdelta — Codex Developer Guide
 
 > Read by OpenAI Codex CLI. Supplements AGENTS.md with Codex-specific conventions.
 
 ## What this project does
 
-redline is a Python library and CLI for semantic diff of AI agent behavior. It captures LLM reasoning steps, tool calls, and tool returns as JSONL traces, embeds them locally with `all-MiniLM-L6-v2`, and finds the first step where two runs diverged.
+agentdelta is a Python library and CLI for semantic diff of AI agent behavior. It captures LLM reasoning steps, tool calls, and tool returns as JSONL traces, embeds them locally with `all-MiniLM-L6-v2`, and finds the first step where two runs diverged.
 
 Primary use case: behavioral regression testing in CI — detect when a prompt change, model upgrade, or tool swap silently changes *how* the agent reasons, not just what it outputs.
 
 ## Module map
 
 ```
-src/redline/
+src/agentdelta/
 ├── trace.py        # TraceNode (content-addressed), TraceEdge, AgentTrace (JSONL I/O)
 ├── embed.py        # Thread-safe SentenceTransformer singleton + cosine alignment
 ├── diff.py         # diff_traces() → DiffResult, ForkPoint, StepDiff
 ├── instrument.py   # LangChain/LangGraph callback + record() context manager
 ├── report.py       # Rich terminal / JSON / GitHub PR Markdown output
-├── cli.py          # Click CLI: redline diff, redline inspect
-└── mcp_server.py   # MCP server (pip install redline[mcp])
+├── cli.py          # Click CLI: agentdelta diff, agentdelta inspect
+└── mcp_server.py   # MCP server (pip install agentdelta[mcp])
 ```
 
 ## Build and test commands
@@ -28,7 +28,7 @@ src/redline/
 make all            # lint + typecheck + test
 
 # Individual
-make test           # pytest --cov=redline (43 tests, target ≥85% coverage)
+make test           # pytest --cov=agentdelta (43 tests, target ≥85% coverage)
 make lint           # ruff check + ruff format --check
 make typecheck      # mypy
 make fmt            # ruff format (auto-fix)
@@ -38,8 +38,8 @@ make fmt            # ruff format (auto-fix)
 
 ```bash
 pip install -e ".[dev]"
-redline diff examples/baseline.jsonl examples/candidate.jsonl
-redline inspect examples/baseline.jsonl
+agentdelta diff examples/baseline.jsonl examples/candidate.jsonl
+agentdelta inspect examples/baseline.jsonl
 ```
 
 ## Key invariants — never change without tests
@@ -61,7 +61,7 @@ redline inspect examples/baseline.jsonl
 
 ## Adding a new framework adapter
 
-1. Create `src/redline/instrument_<framework>.py`
+1. Create `src/agentdelta/instrument_<framework>.py`
 2. Implement a context manager matching the `record()` API in `instrument.py`
 3. Export from `__init__.py` and add to `__all__` alphabetically
 4. Add tests in `tests/test_instrument_<framework>.py`

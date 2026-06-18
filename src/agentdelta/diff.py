@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from redline.embed import align_traces, embed_trace
-from redline.trace import AgentTrace, NodeType, TraceNode
+from agentdelta.embed import align_traces, embed_trace
+from agentdelta.trace import AgentTrace, NodeType, TraceNode
 
 
 @dataclass

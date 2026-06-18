@@ -1,4 +1,4 @@
-name: redline
+name: agentdelta
 description: Detect behavioral regressions in AI agent traces
 author: sandeep-alluru
 
@@ -28,7 +28,7 @@ inputs:
   output-file:
     description: Write Markdown diff report to this file (for PR comments)
     required: false
-    default: "redline-diff.md"
+    default: "agentdelta-diff.md"
 
 outputs:
   has-regression:
@@ -44,7 +44,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Install redline
+    - name: Install agentdelta
       shell: bash
       # Install from the local checkout so the action version matches the repo ref
       run: pip install -e "${{ github.action_path }}" --quiet
@@ -54,7 +54,7 @@ runs:
       shell: bash
       run: |
         set +e
-        redline diff "${{ inputs.baseline }}" "${{ inputs.candidate }}" \
+        agentdelta diff "${{ inputs.baseline }}" "${{ inputs.candidate }}" \
           --format markdown \
           --fork-threshold ${{ inputs.fork-threshold }} \
           --match-threshold ${{ inputs.match-threshold }} \
@@ -62,7 +62,7 @@ runs:
         EXIT_CODE=$?
 
         # Parse summary from JSON output
-        JSON=$(redline diff "${{ inputs.baseline }}" "${{ inputs.candidate }}" \
+        JSON=$(agentdelta diff "${{ inputs.baseline }}" "${{ inputs.candidate }}" \
           --format json \
           --fork-threshold ${{ inputs.fork-threshold }} \
           --match-threshold ${{ inputs.match-threshold }})

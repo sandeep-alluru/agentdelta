@@ -1,6 +1,6 @@
-# GitHub Copilot Instructions — redline
+# GitHub Copilot Instructions — agentdelta
 
-redline is a semantic diff engine for AI agent behavior. It records agent execution traces as JSONL, embeds each step with `all-MiniLM-L6-v2`, and detects the first semantic fork point between two runs.
+agentdelta is a semantic diff engine for AI agent behavior. It records agent execution traces as JSONL, embeds each step with `all-MiniLM-L6-v2`, and detects the first semantic fork point between two runs.
 
 ## Architecture
 
@@ -9,9 +9,9 @@ redline is a semantic diff engine for AI agent behavior. It records agent execut
 | `trace.py` | Data model: `NodeType`, `EdgeType`, `TraceNode`, `TraceEdge`, `AgentTrace` |
 | `embed.py` | Sentence-transformer singleton + `align_traces()` sliding-window alignment |
 | `diff.py` | `diff_traces()` → `DiffResult`, `ForkPoint`, `StepDiff` |
-| `instrument.py` | `RedlineCallback` (LangChain) + `record()` context manager |
+| `instrument.py` | `AgentdeltaCallback` (LangChain) + `record()` context manager |
 | `report.py` | `print_diff()`, `to_json()`, `to_markdown()` formatters |
-| `cli.py` | Click CLI: `redline diff` and `redline inspect` |
+| `cli.py` | Click CLI: `agentdelta diff` and `agentdelta inspect` |
 
 ## Key invariants
 
@@ -44,4 +44,4 @@ Add `to_<format>(result: DiffResult) -> str` to `report.py`, add to `--format` c
 
 ## Adding a new instrumentation adapter
 
-Create `src/redline/instrument_<framework>.py`. See `instrument.py` (LangChain) as reference. Export from `__init__.py`. Add tests.
+Create `src/agentdelta/instrument_<framework>.py`. See `instrument.py` (LangChain) as reference. Export from `__init__.py`. Add tests.

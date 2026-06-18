@@ -39,7 +39,7 @@ jobs:
           pip install -e ".[dev]"
           ruff check src/ tests/
           ruff format --check src/ tests/
-          mypy src/redline/ --ignore-missing-imports
+          mypy src/agentdelta/ --ignore-missing-imports
           pytest tests/ -v --tb=short
 
   build:

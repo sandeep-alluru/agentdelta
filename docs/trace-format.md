@@ -1,6 +1,6 @@
 # Trace Format
 
-redline traces are `.jsonl` files — one JSON object per line, human-readable, and `git diff`-able.
+agentdelta traces are `.jsonl` files — one JSON object per line, human-readable, and `git diff`-able.
 
 ## Record types
 
@@ -89,8 +89,8 @@ Any additional fields are stored as trace metadata.
 You don't need the LangChain callback. Emit nodes directly:
 
 ```python
-from redline import AgentTrace
-from redline.trace import TraceNode, TraceEdge, NodeType, EdgeType
+from agentdelta import AgentTrace
+from agentdelta.trace import TraceNode, TraceEdge, NodeType, EdgeType
 
 trace = AgentTrace(run_id="my_run_v1")
 

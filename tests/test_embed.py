@@ -1,10 +1,10 @@
-"""Tests for redline.embed."""
+"""Tests for agentdelta.embed."""
 
 from __future__ import annotations
 
 import pytest
 
-from redline.embed import align_traces, cosine_similarity, embed_trace, find_best_match
+from agentdelta.embed import align_traces, cosine_similarity, embed_trace, find_best_match
 
 
 def test_cosine_similarity_identical():
