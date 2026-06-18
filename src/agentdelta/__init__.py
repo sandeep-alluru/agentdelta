@@ -6,11 +6,11 @@ from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNod
 
 __all__ = [
     "AgentTrace",
+    "AgentdeltaCallback",
     "DiffResult",
     "EdgeType",
     "ForkPoint",
     "NodeType",
-    "AgentdeltaCallback",
     "TraceEdge",
     "TraceNode",
     "diff_traces",
