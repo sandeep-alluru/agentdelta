@@ -1,0 +1,32 @@
+language: en
+early_access: false
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!assets/**"
+    - "!*.md"
+  path_instructions:
+    - path: "src/agentdelta/diff.py"
+      instructions: |
+        This is the core fork-detection algorithm. Be strict about:
+        - Threshold defaults must not change without a migration note
+        - New status values must be added to the literal type in StepDiff
+        - Fork detection must remain O(n) per alignment pair
+    - path: "src/agentdelta/embed.py"
+      instructions: |
+        Thread safety: _get_model() uses double-checked locking. Any change
+        to the singleton pattern must preserve thread safety.
+    - path: "tests/**"
+      instructions: |
+        Ensure new tests use fixtures from conftest.py rather than
+        building traces inline. CLI tests must use click.testing.CliRunner.
+chat:
+  auto_reply: true

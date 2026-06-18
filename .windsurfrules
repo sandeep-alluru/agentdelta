@@ -1,0 +1,25 @@
+# agentdelta — Windsurf Rules
+
+## Project overview
+agentdelta is a Python library and CLI for semantic diff of AI agent behavior. It captures agent traces (LLM calls, tool calls, tool returns) as JSONL, embeds each step locally with sentence-transformers, and finds the first fork point between two runs.
+
+## Architecture
+- `src/agentdelta/trace.py` — TraceNode (content-addressed), TraceEdge, AgentTrace (JSONL I/O)
+- `src/agentdelta/embed.py` — thread-safe all-MiniLM-L6-v2 singleton, cosine similarity, sliding-window alignment
+- `src/agentdelta/diff.py` — diff_traces(), DiffResult, ForkPoint, StepDiff
+- `src/agentdelta/instrument.py` — AgentDeltaCallback (LangChain), record() context manager
+- `src/agentdelta/report.py` — Rich terminal, JSON, Markdown output
+- `src/agentdelta/cli.py` — agentdelta diff / inspect CLI
+
+## Rules
+1. All embeddings must go through `_get_model()` in embed.py — never import SentenceTransformer directly
+2. TraceNode.id is deterministic (SHA-256 hash) — never assign it manually
+3. Library code must not use print() — use rich.console.Console
+4. All public API must have type annotations and docstrings
+5. Tests must not mock the embedding model — use real short traces (< 5 nodes)
+6. New formatters go in report.py and must be wired to --format in cli.py
+7. New framework adapters go in instrument_<framework>.py, exported from __init__.py
+
+## Stack
+Python 3.10+, sentence-transformers, numpy, rich, click, pytest
+Linting: ruff (E W F I UP B S N SIM RUF PT), mypy strict

@@ -1,0 +1,98 @@
+# Bug reports
+- name: bug
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: fix
+  color: "d73a4a"
+  description: "A bug fix"
+
+# Features
+- name: enhancement
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: feature
+  color: "a2eeef"
+  description: "New feature"
+
+- name: feat
+  color: "a2eeef"
+  description: "New feature (conventional commit)"
+
+# Documentation
+- name: documentation
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: docs
+  color: "0075ca"
+  description: "Documentation update"
+
+# Maintenance
+- name: chore
+  color: "e4e669"
+  description: "Build process, dependencies, or tooling"
+
+- name: dependencies
+  color: "0366d6"
+  description: "Pull requests that update a dependency"
+
+- name: ci
+  color: "e4e669"
+  description: "CI/CD changes"
+
+- name: refactor
+  color: "fef2c0"
+  description: "Code refactoring without behavior change"
+
+# Tests
+- name: test
+  color: "bfd4f2"
+  description: "Adding missing tests or correcting existing tests"
+
+# Version bumps
+- name: major
+  color: "ee0701"
+  description: "Breaking change — bumps major version"
+
+- name: minor
+  color: "fbca04"
+  description: "Non-breaking new feature — bumps minor version"
+
+- name: patch
+  color: "0075ca"
+  description: "Backwards compatible bug fix — bumps patch version"
+
+# Meta
+- name: good first issue
+  color: "7057ff"
+  description: "Good for newcomers"
+
+- name: help wanted
+  color: "008672"
+  description: "Extra attention is needed"
+
+- name: security
+  color: "ee0701"
+  description: "Security vulnerability"
+
+- name: pinned
+  color: "e11d48"
+  description: "Pinned issue — do not close"
+
+- name: duplicate
+  color: "cfd3d7"
+  description: "This issue or pull request already exists"
+
+- name: invalid
+  color: "e4e4e7"
+  description: "This doesn't seem right"
+
+- name: wontfix
+  color: "e4e4e7"
+  description: "This will not be worked on"
+
+- name: question
+  color: "d876e3"
+  description: "Further information is requested"

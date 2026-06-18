@@ -1,0 +1,211 @@
+openapi: "3.1.0"
+info:
+  title: agentdelta API
+  description: |
+    Semantic diff engine for AI agent behavior.
+    Compare two agent execution traces and detect the exact step where behavior diverged.
+    Run locally: `pip install "agentdelta[api]"` then `uvicorn agentdelta.api:app`
+  version: "0.1.0"
+  contact:
+    name: Sandeep Alluru
+    email: onepuncchh@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/sandeep-alluru/agentdelta/blob/main/LICENSE
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /diff:
+    post:
+      operationId: diffTraces
+      summary: Compare two agent traces
+      description: |
+        Embed both traces with all-MiniLM-L6-v2, align steps by cosine similarity,
+        and return the first fork point where similarity dropped below fork_threshold.
+        has_regression is true iff a fork point was found.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiffRequest"
+      responses:
+        "200":
+          description: Diff result with fork point and per-step alignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiffResult"
+        "422":
+          description: Invalid trace content or parameters
+
+  /inspect:
+    post:
+      operationId: inspectTrace
+      summary: Summarise a single agent trace
+      description: |
+        Parse a JSONL trace and return the run_id, step count, edge count,
+        and a preview of each step's node type and content.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectRequest"
+      responses:
+        "200":
+          description: Trace summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectResult"
+        "422":
+          description: Invalid trace content
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  version:
+                    type: string
+                    example: "0.1.0"
+
+components:
+  schemas:
+    DiffRequest:
+      type: object
+      required:
+        - trace_a
+        - trace_b
+      properties:
+        trace_a:
+          type: string
+          description: Baseline JSONL trace content (one JSON object per line)
+        trace_b:
+          type: string
+          description: Candidate JSONL trace content (one JSON object per line)
+        fork_threshold:
+          type: number
+          default: 0.70
+          description: Cosine similarity below this marks a fork point
+        match_threshold:
+          type: number
+          default: 0.85
+          description: Cosine similarity above this is considered a match
+
+    DiffResult:
+      type: object
+      properties:
+        run_id_a:
+          type: string
+        run_id_b:
+          type: string
+        has_regression:
+          type: boolean
+          description: True if a fork point was detected
+        fork_point:
+          nullable: true
+          $ref: "#/components/schemas/ForkPoint"
+        summary:
+          $ref: "#/components/schemas/DiffSummary"
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/StepDiff"
+
+    ForkPoint:
+      type: object
+      properties:
+        step_a:
+          type: integer
+          description: Step number in trace A where the fork occurred
+        step_b:
+          type: integer
+          description: Step number in trace B where the fork occurred
+        similarity:
+          type: number
+          description: Cosine similarity at the fork (< fork_threshold)
+        description:
+          type: string
+          description: Human-readable explanation of the divergence
+        is_tool_change:
+          type: boolean
+        is_reasoning_change:
+          type: boolean
+
+    DiffSummary:
+      type: object
+      properties:
+        total_steps:
+          type: integer
+        matched:
+          type: integer
+        changed:
+          type: integer
+        added:
+          type: integer
+        removed:
+          type: integer
+        similarity_pct:
+          type: number
+          description: Percentage of steps that matched
+
+    StepDiff:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [match, changed, added, removed]
+        similarity:
+          type: number
+        summary:
+          type: string
+
+    InspectRequest:
+      type: object
+      required:
+        - trace
+      properties:
+        trace:
+          type: string
+          description: JSONL trace content to inspect
+
+    InspectResult:
+      type: object
+      properties:
+        run_id:
+          type: string
+        total_nodes:
+          type: integer
+        total_edges:
+          type: integer
+        metadata:
+          type: object
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              step:
+                type: integer
+              type:
+                type: string
+                enum: [start, llm, tool_call, tool_return, end]
+              content_preview:
+                type: string
+              id:
+                type: string

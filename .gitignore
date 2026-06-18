@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# mypy
+.mypy_cache/
+
+# ruff
+.ruff_cache/
+
+# sentence-transformers model cache
+.cache/
+models/
+
+# trace files (can be large)
+traces/*.jsonl
+
+# IDE
+.idea/
+.vscode/
+*.swp

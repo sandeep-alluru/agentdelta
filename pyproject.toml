@@ -1,0 +1,124 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentdelta"
+version = "0.1.0"
+description = "Semantic diff engine for AI agent behavior — find the exact decision fork between two runs"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "Sandeep Alluru", email = "onepuncchh@gmail.com" }]
+keywords = [
+    "llm", "agents", "diff", "testing", "regression",
+    "langchain", "langgraph", "observability", "tracing", "ai",
+    "mcp", "behavioral-testing", "llmops", "evals",
+    "agent-testing", "ci-cd", "fork-detection",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Environment :: Console",
+    "Typing :: Typed",
+]
+dependencies = [
+    "networkx>=3.0",
+    "sentence-transformers>=3.0",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "rich>=13.0",
+    "pydantic>=2.0",
+    "click>=8.0",
+]
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.2"]
+mcp = ["mcp>=1.0"]
+api = ["fastapi>=0.110", "uvicorn>=0.29"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.9",
+    "mypy>=1.10",
+    "pre-commit>=3.0",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.0",
+    "mkdocstrings[python]>=0.25",
+]
+
+[project.scripts]
+agentdelta = "agentdelta.cli:main"
+agentdelta-mcp = "agentdelta.mcp_server:run_server"
+
+[project.urls]
+Homepage      = "https://github.com/sandeep-alluru/agentdelta"
+Repository    = "https://github.com/sandeep-alluru/agentdelta"
+Documentation = "https://sandeep-alluru.github.io/agentdelta"
+Changelog     = "https://github.com/sandeep-alluru/agentdelta/blob/main/CHANGELOG.md"
+Issues        = "https://github.com/sandeep-alluru/agentdelta/issues"
+
+# ── Ruff ──────────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length    = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit
+    "N",    # pep8 naming
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-native rules
+    "PT",   # flake8-pytest-style
+]
+ignore = [
+    "S101",  # assert used in tests
+    "N806",  # variable in function should be lowercase — conflicts with numpy convention
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"examples/**" = ["S101", "T201"]
+
+# ── Mypy ──────────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version           = "3.10"
+strict                   = false
+ignore_missing_imports   = true
+warn_return_any          = true
+warn_unused_ignores      = true
+warn_unused_configs      = true
+disallow_untyped_defs    = true
+disallow_any_generics    = true
+check_untyped_defs       = true
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "--cov=agentdelta --cov-report=term-missing --cov-report=xml"
+
+# ── Coverage ──────────────────────────────────────────────────────────────────
+[tool.coverage.run]
+source   = ["agentdelta"]
+branch   = true
+omit     = ["*/tests/*", "*/examples/*"]
+
+[tool.coverage.report]
+fail_under   = 85
+show_missing = true

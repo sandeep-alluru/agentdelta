@@ -1,0 +1,72 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "diff_traces",
+      "description": "Compare two agentdelta JSONL trace files to detect behavioral regressions. Returns a DiffResult with the first fork point (divergent step), per-step alignment, and summary statistics. Use this to check whether a prompt change, model upgrade, or tool swap changed how an agent reasons.",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "trace_a_content": {
+            "type": "string",
+            "description": "Full content of the baseline JSONL trace file (one JSON object per line)"
+          },
+          "trace_b_content": {
+            "type": "string",
+            "description": "Full content of the candidate JSONL trace file (one JSON object per line)"
+          },
+          "fork_threshold": {
+            "type": "number",
+            "description": "Cosine similarity below this value marks a fork point. Default: 0.70"
+          },
+          "match_threshold": {
+            "type": "number",
+            "description": "Cosine similarity above this value is considered a match. Default: 0.85"
+          }
+        },
+        "required": ["trace_a_content", "trace_b_content"],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "inspect_trace",
+      "description": "Summarise a single agentdelta JSONL trace file. Returns the run_id, total node and edge count, and a step-by-step breakdown with node type and content preview for each step.",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "trace_content": {
+            "type": "string",
+            "description": "Full content of the JSONL trace file to inspect (one JSON object per line)"
+          }
+        },
+        "required": ["trace_content"],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "record_snippet",
+      "description": "Return a ready-to-paste Python code snippet to record an agent run with agentdelta for a given framework.",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "framework": {
+            "type": "string",
+            "enum": ["langchain", "langgraph", "custom"],
+            "description": "The agent framework the user is working with"
+          }
+        },
+        "required": ["framework"],
+        "additionalProperties": false
+      }
+    }
+  }
+]

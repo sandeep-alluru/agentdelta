@@ -1,0 +1,6 @@
+# Global owner — reviews all PRs by default
+* @sandeep-alluru
+
+# Core algorithm — extra scrutiny
+src/agentdelta/diff.py @sandeep-alluru
+src/agentdelta/embed.py @sandeep-alluru

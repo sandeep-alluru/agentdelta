@@ -1,0 +1,81 @@
+name: agentdelta
+description: Detect behavioral regressions in AI agent traces
+author: sandeep-alluru
+
+branding:
+  icon: git-merge
+  color: yellow
+
+inputs:
+  baseline:
+    description: Path to the baseline trace JSONL file
+    required: true
+  candidate:
+    description: Path to the candidate trace JSONL file
+    required: true
+  fork-threshold:
+    description: Similarity below this marks a fork point (0.0–1.0)
+    required: false
+    default: "0.70"
+  match-threshold:
+    description: Similarity above this is a match (0.0–1.0)
+    required: false
+    default: "0.85"
+  fail-on-regression:
+    description: Exit with code 1 if a regression is detected
+    required: false
+    default: "true"
+  output-file:
+    description: Write Markdown diff report to this file (for PR comments)
+    required: false
+    default: "agentdelta-diff.md"
+
+outputs:
+  has-regression:
+    description: "true if a behavioral fork was detected, false otherwise"
+    value: ${{ steps.diff.outputs.has_regression }}
+  similarity-pct:
+    description: Percentage of steps that matched
+    value: ${{ steps.diff.outputs.similarity_pct }}
+  fork-step:
+    description: Step number of the first fork point (empty if no regression)
+    value: ${{ steps.diff.outputs.fork_step }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install agentdelta
+      shell: bash
+      # Install from the local checkout so the action version matches the repo ref
+      run: pip install -e "${{ github.action_path }}" --quiet
+
+    - name: Run diff
+      id: diff
+      shell: bash
+      run: |
+        set +e
+        agentdelta diff "${{ inputs.baseline }}" "${{ inputs.candidate }}" \
+          --format markdown \
+          --fork-threshold ${{ inputs.fork-threshold }} \
+          --match-threshold ${{ inputs.match-threshold }} \
+          > "${{ inputs.output-file }}"
+        EXIT_CODE=$?
+
+        # Parse summary from JSON output
+        JSON=$(agentdelta diff "${{ inputs.baseline }}" "${{ inputs.candidate }}" \
+          --format json \
+          --fork-threshold ${{ inputs.fork-threshold }} \
+          --match-threshold ${{ inputs.match-threshold }})
+
+        HAS_REGRESSION=$(echo "$JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(str(d['summary']['has_regression']).lower())")
+        SIM_PCT=$(echo "$JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['summary']['similarity_pct'])")
+        FORK_STEP=$(echo "$JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['summary']['fork_step'] or '')")
+
+        echo "has_regression=$HAS_REGRESSION" >> $GITHUB_OUTPUT
+        echo "similarity_pct=$SIM_PCT" >> $GITHUB_OUTPUT
+        echo "fork_step=$FORK_STEP" >> $GITHUB_OUTPUT
+
+        if [ "${{ inputs.fail-on-regression }}" = "true" ] && [ "$HAS_REGRESSION" = "true" ]; then
+          exit 1
+        fi
+        exit 0

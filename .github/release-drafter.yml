@@ -1,0 +1,58 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "🚀 New Features"
+    labels:
+      - "feature"
+      - "enhancement"
+      - "feat"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "fix"
+      - "bugfix"
+      - "bug"
+  - title: "🧰 Maintenance"
+    labels:
+      - "chore"
+      - "dependencies"
+      - "ci"
+      - "refactor"
+  - title: "📖 Documentation"
+    labels:
+      - "documentation"
+      - "docs"
+  - title: "🧪 Tests"
+    labels:
+      - "test"
+      - "tests"
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-prefix: ""
+no-changes-template: "No changes."
+version-resolver:
+  major:
+    labels:
+      - "major"
+      - "breaking"
+  minor:
+    labels:
+      - "minor"
+      - "feature"
+      - "enhancement"
+      - "feat"
+  patch:
+    labels:
+      - "patch"
+      - "fix"
+      - "bugfix"
+      - "documentation"
+      - "chore"
+      - "dependencies"
+      - "ci"
+      - "refactor"
+  default: patch
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/sandeep-alluru/agentdelta/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

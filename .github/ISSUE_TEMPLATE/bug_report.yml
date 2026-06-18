@@ -1,0 +1,56 @@
+name: Bug Report
+description: Something is broken
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as you can.
+
+  - type: input
+    id: version
+    attributes:
+      label: agentdelta version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.11.5"
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command run
+      description: The exact command or Python code that triggered the bug
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the full error message and traceback if applicable
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: trace_format
+    attributes:
+      label: Trace file snippet (optional)
+      description: A minimal .jsonl trace that reproduces the issue (redact any sensitive content)
+      render: json

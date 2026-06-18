@@ -1,0 +1,98 @@
+site_name: agentdelta
+site_description: Semantic diff engine for AI agent behavior
+site_url: https://sandeep-alluru.github.io/agentdelta
+repo_url: https://github.com/sandeep-alluru/agentdelta
+repo_name: sandeep-alluru/agentdelta
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+  logo: assets/logo.png
+  favicon: assets/logo.png
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            members_order: source
+            docstring_style: google
+            merge_init_into_class: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: quickstart.md
+    - How It Works: how-it-works.md
+  - Reference:
+    - CLI: cli-reference.md
+    - Python API: api-reference.md
+    - Trace Format: trace-format.md
+  - Guides:
+    - GitHub Action: github-action.md
+    - MCP / Claude Integration: mcp.md
+    - OpenAI Integration: openai.md
+    - Adding an Adapter: adding-adapter.md
+  - Architecture: architecture.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sandeep-alluru/agentdelta
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/agentdelta/
+  analytics:
+    provider: google
+    property: ""

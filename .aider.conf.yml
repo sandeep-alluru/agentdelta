@@ -1,0 +1,24 @@
+# aider configuration for agentdelta
+# https://aider.chat/docs/config/aider_conf.html
+
+# Always include these files for architectural context
+read:
+  - ARCHITECTURE.md
+  - CLAUDE.md
+  - src/agentdelta/trace.py
+  - src/agentdelta/diff.py
+
+# Auto-lint after edits
+lint: true
+lint-cmd: "ruff check {files} && ruff format --check {files}"
+
+# Auto-test after edits
+auto-test: false
+test-cmd: "pytest tests/ -x -q"
+
+# Model guidance
+model: claude-sonnet-4-5
+
+# Conventions
+attribute-author: false
+attribute-co-author: true
