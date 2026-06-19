@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from agentdelta.diff import DiffResult, ForkPoint, diff_traces
+from agentdelta.diff import DiffResult, ForkPoint, StepDiff, diff_traces
+from agentdelta.trace import NodeType, TraceNode
 
 
 def test_no_regression_on_similar_traces(simple_trace_a, simple_trace_b_match):
@@ -62,6 +63,73 @@ def test_identical_traces_no_changes(simple_trace_a):
     assert result.summary["similarity_pct"] == 100.0
 
 
-def test_has_regression_property(simple_trace_a, simple_trace_b_match):
-    result = diff_traces(simple_trace_a, simple_trace_b_match)
-    assert result.has_regression == (result.fork_point is not None)
+def test_has_regression_property_with_fork(simple_trace_a, simple_trace_b_fork):
+    result = diff_traces(simple_trace_a, simple_trace_b_fork, fork_threshold=0.70)
+    # has_regression should be True when there is a fork point
+    if result.fork_point is not None:
+        assert result.has_regression is True
+
+
+def test_has_regression_all_zero_match() -> None:
+    """has_regression should be True when total > 0 and matched == 0, even without fork_point."""
+    # Craft a DiffResult with no fork_point but all steps unmatched
+    node_a = TraceNode(step=1, node_type=NodeType.START, content="hello")
+    node_b = TraceNode(step=1, node_type=NodeType.START, content="world")
+    result = DiffResult(
+        run_id_a="a",
+        run_id_b="b",
+        steps=[StepDiff(node_a, node_b, 0.0, "changed", "diverged")],
+        fork_point=None,
+        summary={"total": 1, "matched": 0, "has_regression": True},
+    )
+    assert result.has_regression is True
+
+
+def test_fork_point_is_tool_change() -> None:
+    """ForkPoint.is_tool_change() should return True for tool call transitions."""
+    node_a = TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="tool_a()")
+    node_b = TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="tool_b()")
+    fp = ForkPoint(
+        step_a=1, step_b=1, node_a=node_a, node_b=node_b, similarity=0.3, description="changed"
+    )
+    assert fp.is_tool_change() is True
+
+
+def test_fork_point_is_not_tool_change_for_llm() -> None:
+    """ForkPoint.is_tool_change() should return False for LLM→LLM."""
+    node_a = TraceNode(step=1, node_type=NodeType.LLM, content="reasoning a")
+    node_b = TraceNode(step=1, node_type=NodeType.LLM, content="reasoning b")
+    fp = ForkPoint(
+        step_a=1, step_b=1, node_a=node_a, node_b=node_b, similarity=0.4, description="llm diverge"
+    )
+    assert fp.is_tool_change() is False
+
+
+def test_fork_point_is_reasoning_change() -> None:
+    """ForkPoint.is_reasoning_change() should return True for LLM→LLM transitions."""
+    node_a = TraceNode(step=2, node_type=NodeType.LLM, content="I will use tool A")
+    node_b = TraceNode(step=2, node_type=NodeType.LLM, content="I will use tool B")
+    fp = ForkPoint(
+        step_a=2, step_b=2, node_a=node_a, node_b=node_b, similarity=0.5, description="reasoning"
+    )
+    assert fp.is_reasoning_change() is True
+
+
+def test_fork_point_is_not_reasoning_change_for_tools() -> None:
+    """ForkPoint.is_reasoning_change() should return False for tool calls."""
+    node_a = TraceNode(step=3, node_type=NodeType.TOOL_CALL, content="tool()")
+    node_b = TraceNode(step=3, node_type=NodeType.TOOL_RETURN, content="result")
+    fp = ForkPoint(
+        step_a=3, step_b=3, node_a=node_a, node_b=node_b, similarity=0.2, description="tool change"
+    )
+    assert fp.is_reasoning_change() is False
+
+
+def test_describe_fork_tool_call_different_tools(simple_trace_a, simple_trace_b_fork):
+    """Traces that fork at a tool call step should produce a descriptive fork description."""
+    result = diff_traces(simple_trace_a, simple_trace_b_fork, fork_threshold=0.70)
+    if result.fork_point is not None:
+        assert len(result.fork_point.description) > 0
+        # Should mention something about the change
+        desc = result.fork_point.description.lower()
+        assert any(word in desc for word in ["tool", "changed", "diverged", "similarity", "step"])

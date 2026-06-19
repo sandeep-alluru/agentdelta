@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+from typing import Any
 
 import numpy as np
 
@@ -12,7 +13,7 @@ _lock = threading.Lock()
 _model = None
 
 
-def _get_model():
+def _get_model() -> Any:
     """Return the sentence-transformer singleton, initialising it on first call (thread-safe)."""
     global _model
     if _model is None:

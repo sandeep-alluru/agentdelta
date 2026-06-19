@@ -109,6 +109,7 @@ def compute_score(
             fork_penalty = 0.0
         else:
             fork_penalty = ((fp.step_a - 1) / (baseline_nodes - 1)) * 100.0
+    fork_penalty = min(100.0, max(0.0, fork_penalty))
 
     # ── Overall score ─────────────────────────────────────────────────────────
     # Weighted combination

@@ -25,19 +25,13 @@ import json
 import sys
 from typing import Any
 
-
-def _require_mcp() -> Any:
-    try:
-        import mcp.server.stdio
-        import mcp.types as types
-        from mcp.server import Server
-        return mcp, types, Server
-    except ImportError:
-        print(
-            "MCP server requires: pip install 'agentdelta[mcp]'",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+try:
+    import mcp.server.stdio as _mcp_stdio
+    import mcp.types as _mcp_types
+    from mcp.server import Server as _Server
+    _HAS_MCP = True
+except ImportError:
+    _HAS_MCP = False
 
 
 def _diff(
@@ -102,14 +96,16 @@ trace.save("my_run.jsonl")
 
 def run_server() -> None:
     """Start the MCP server on stdio."""
-    mcp_mod, types, Server = _require_mcp()
+    if not _HAS_MCP:
+        print("MCP server requires: pip install 'agentdelta[mcp]'", file=sys.stderr)
+        sys.exit(1)
 
-    server = Server("agentdelta")
+    server = _Server("agentdelta")
 
     @server.list_tools()
-    async def list_tools() -> list[types.Tool]:
+    async def list_tools() -> list[_mcp_types.Tool]:
         return [
-            types.Tool(
+            _mcp_types.Tool(
                 name="diff_traces",
                 description=(
                     "Compare two agentdelta JSONL trace files. Returns a DiffResult JSON with "
@@ -132,7 +128,7 @@ def run_server() -> None:
                     "required": ["trace_a", "trace_b"],
                 },
             ),
-            types.Tool(
+            _mcp_types.Tool(
                 name="inspect_trace",
                 description=(
                     "Summarise a single agentdelta JSONL trace file: run_id, node count, "
@@ -146,7 +142,7 @@ def run_server() -> None:
                     "required": ["trace_path"],
                 },
             ),
-            types.Tool(
+            _mcp_types.Tool(
                 name="record_snippet",
                 description=(
                     "Return a copy-paste Python snippet to record an agent run with agentdelta."
@@ -166,7 +162,7 @@ def run_server() -> None:
         ]
 
     @server.call_tool()
-    async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent]:
+    async def call_tool(name: str, arguments: dict[str, Any]) -> list[_mcp_types.TextContent]:
         if name == "diff_traces":
             result = _diff(
                 arguments["trace_a"],
@@ -174,23 +170,23 @@ def run_server() -> None:
                 float(arguments.get("fork_threshold", 0.70)),
                 float(arguments.get("match_threshold", 0.85)),
             )
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [_mcp_types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
         if name == "inspect_trace":
             result = _inspect(arguments["trace_path"])
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [_mcp_types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
         if name == "record_snippet":
             framework = arguments.get("framework", "langchain")
             snippet = _RECORD_SNIPPETS.get(framework, _RECORD_SNIPPETS["custom"])
-            return [types.TextContent(type="text", text=snippet)]
+            return [_mcp_types.TextContent(type="text", text=snippet)]
 
         raise ValueError(f"Unknown tool: {name}")
 
     import asyncio
 
     async def _main() -> None:
-        async with mcp_mod.server.stdio.stdio_server() as (read_stream, write_stream):
+        async with _mcp_stdio.stdio_server() as (read_stream, write_stream):
             await server.run(read_stream, write_stream, server.create_initialization_options())
 
     asyncio.run(_main())

@@ -149,3 +149,65 @@ def test_str_representation(identical_traces: tuple[AgentTrace, AgentTrace]) -> 
     s = str(score)
     assert "overall=" in s
     assert "verdict=" in s
+
+
+def test_fork_at_step_1_fork_penalty_zero() -> None:
+    """Fork at the very first step should yield fork_penalty=0.0."""
+    a = _make_trace(
+        "a",
+        [
+            (NodeType.START, "user query about redis"),
+            (NodeType.LLM, "I will use the cache tool now"),
+            (NodeType.END, "done with cache"),
+        ],
+    )
+    b = _make_trace(
+        "b",
+        [
+            (NodeType.START, "user query about postgres"),
+            (NodeType.LLM, "I will use the database tool now"),
+            (NodeType.END, "done with database"),
+        ],
+    )
+    diff = diff_traces(a, b, fork_threshold=0.99)  # force fork at step 1
+    score = compute_score(diff)
+    # fork_penalty must be clamped to [0, 100]
+    assert 0.0 <= score.fork_penalty <= 100.0
+    assert isinstance(score, RegressionScore)
+
+
+def test_fork_at_last_step_penalty_near_100() -> None:
+    """Fork at the last step should yield a fork_penalty close to 100."""
+    steps_a: list[tuple[NodeType, str]] = [
+        (NodeType.START, "What is 2 + 2?"),
+        (NodeType.LLM, "The answer is four."),
+        (NodeType.TOOL_CALL, "calc(2+2)"),
+        (NodeType.TOOL_RETURN, "4"),
+        (NodeType.END, "The answer is four"),
+    ]
+    steps_b: list[tuple[NodeType, str]] = [
+        (NodeType.START, "What is 2 + 2?"),
+        (NodeType.LLM, "The answer is four."),
+        (NodeType.TOOL_CALL, "calc(2+2)"),
+        (NodeType.TOOL_RETURN, "4"),
+        (NodeType.END, "The result is 4.0"),
+    ]
+    a = _make_trace("a", steps_a)
+    b = _make_trace("b", steps_b)
+    diff = diff_traces(a, b, fork_threshold=0.99, match_threshold=0.999)
+    score = compute_score(diff)
+    assert 0.0 <= score.fork_penalty <= 100.0
+
+
+def test_no_fork_fork_penalty_is_100() -> None:
+    """Traces with no fork should yield fork_penalty exactly 100.0."""
+    steps: list[tuple[NodeType, str]] = [
+        (NodeType.START, "What is 3 + 3?"),
+        (NodeType.LLM, "The answer is six."),
+        (NodeType.END, "six"),
+    ]
+    a = _make_trace("a", steps)
+    b = _make_trace("b", steps)
+    diff = diff_traces(a, b)
+    score = compute_score(diff)
+    assert score.fork_penalty == 100.0

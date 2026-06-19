@@ -84,7 +84,9 @@ class DiffResult:
     @property
     def has_regression(self) -> bool:
         """True if the traces diverged (a fork point was detected)."""
-        return self.fork_point is not None
+        fp = self.fork_point is not None
+        counts = self.summary
+        return fp or (counts.get("total", 0) > 0 and counts.get("matched", 0) == 0)
 
     @property
     def changed_steps(self) -> list[StepDiff]:
@@ -146,6 +148,8 @@ def diff_traces(
 
     for na, nb, score in alignment:
         if na is None:
+            if nb is None:
+                continue
             summary = f"+ [{nb.node_type.value}] {nb.content[:80]}"
             steps.append(StepDiff(None, nb, 0.0, "added", summary))
         elif nb is None:
