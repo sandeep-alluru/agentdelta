@@ -338,12 +338,18 @@ run("agentdelta inspect outputs node types", _test_cli_inspect)
 section("6. FastAPI server (agentdelta[api])")
 
 def _test_api_import():
-    from agentdelta.api import app
-    assert app.title == "agentdelta API"
+    try:
+        from agentdelta.api import app
+        assert app.title == "agentdelta API"
+    except ImportError:
+        raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
 
 def _test_api_health():
-    from fastapi.testclient import TestClient
-    from agentdelta.api import app
+    try:
+        from fastapi.testclient import TestClient
+        from agentdelta.api import app
+    except ImportError:
+        raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
     client = TestClient(app)
     r = client.get("/health")
     assert r.status_code == 200
@@ -351,8 +357,11 @@ def _test_api_health():
     assert "version" in r.json()
 
 def _test_api_diff_endpoint():
-    from fastapi.testclient import TestClient
-    from agentdelta.api import app
+    try:
+        from fastapi.testclient import TestClient
+        from agentdelta.api import app
+    except ImportError:
+        raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
 
     def _trace_to_str(trace) -> str:
         path = Path(tempfile.mktemp(suffix=".jsonl"))
@@ -372,8 +381,11 @@ def _test_api_diff_endpoint():
     assert data["summary"]["has_regression"] is True
 
 def _test_api_inspect_endpoint():
-    from fastapi.testclient import TestClient
-    from agentdelta.api import app
+    try:
+        from fastapi.testclient import TestClient
+        from agentdelta.api import app
+    except ImportError:
+        raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
 
     path = Path(tempfile.mktemp(suffix=".jsonl"))
     _build_weather_trace("api-inspect", "get_weather").save(path)
@@ -450,7 +462,7 @@ run("AGENTS.md exists and non-empty", lambda: _check_file_nonempty("AGENTS.md"))
 run("CLAUDE.md exists and non-empty", lambda: _check_file_nonempty("CLAUDE.md"))
 run("CODEX.md exists and non-empty", lambda: _check_file_nonempty("CODEX.md"))
 run(".github/copilot-instructions.md exists", lambda: _check_file_nonempty(".github/copilot-instructions.md"))
-run(".cursor/rules/ has at least one .mdc file", lambda: _check_file_nonempty(".cursor/rules/agentdelta.mdc"))
+run(".cursor/rules/ has at least one .mdc file", lambda: _check_file_nonempty(".cursor/rules/redline.mdc"))
 run(".windsurfrules exists", lambda: _check_file_nonempty(".windsurfrules"))
 run(".aider.conf.yml exists", lambda: _check_file_nonempty(".aider.conf.yml"))
 run(".continue/config.json is valid JSON", lambda: _check_json_valid(".continue/config.json"))

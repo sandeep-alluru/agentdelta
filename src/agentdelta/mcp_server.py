@@ -1,14 +1,13 @@
 """MCP server exposing agentdelta as Claude tools.
 
 Start with: python -m agentdelta.mcp_server
-Or via CLI: agentdelta mcp
+Or via CLI: agentdelta-mcp
 
 Add to Claude Desktop (~/.config/claude/claude_desktop_config.json):
     {
         "mcpServers": {
             "agentdelta": {
-                "command": "python",
-                "args": ["-m", "agentdelta.mcp_server"]
+                "command": "agentdelta-mcp"
             }
         }
     }

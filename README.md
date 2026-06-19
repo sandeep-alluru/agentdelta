@@ -49,24 +49,45 @@ pip install agentdelta
 pipx run agentdelta --help
 ```
 
+> **Note:** First install downloads PyTorch and CUDA libs (~2.5 GB). For CPU-only systems:
+> `pip install agentdelta --extra-index-url https://download.pytorch.org/whl/cpu`
+
 **With LangChain/LangGraph:**
 
 ```bash
 pip install "agentdelta[langchain]"
 ```
 
-**Capture two runs:**
+> The `[langchain]` extra is only needed if instrumenting a real LangChain agent. `AgentdeltaCallback` can be used directly with any framework.
+
+**Capture two runs (self-contained — no LangChain required):**
 
 ```python
-from agentdelta import record
+from agentdelta.instrument import AgentdeltaCallback
+from agentdelta import AgentTrace, diff_traces
+from agentdelta.report import print_diff
+
+class _FakeLLMResponse:
+    def __init__(self, text):
+        self.generations = [[type("G", (), {"text": text})()]]
+
+def build_trace(run_id, tool_name):
+    cb = AgentdeltaCallback(run_id=run_id)
+    cb.on_chain_start({}, {"input": "What is the weather in Tokyo?"})
+    cb.on_llm_end(_FakeLLMResponse("I should look up the weather."))
+    cb.on_tool_start({"name": tool_name}, "location='Tokyo'")
+    cb.on_tool_end('{"temp": 22, "condition": "sunny"}')
+    cb.on_llm_end(_FakeLLMResponse("The weather in Tokyo is 22C and sunny."))
+    cb.on_chain_end({"output": "Tokyo: 22C, sunny."})
+    return cb.trace
 
 # Baseline run (before your change)
-with record("baseline.jsonl", run_id="v1.0") as cb:
-    agent.invoke({"input": "..."}, config={"callbacks": [cb]})
+trace_a = build_trace("v1.0", tool_name="get_weather")
+trace_a.save("baseline.jsonl")
 
-# Candidate run (after your change)
-with record("candidate.jsonl", run_id="v1.1") as cb:
-    agent.invoke({"input": "..."}, config={"callbacks": [cb]})
+# Candidate run (after your change — switched to a different tool)
+trace_b = build_trace("v1.1", tool_name="web_search")
+trace_b.save("candidate.jsonl")
 ```
 
 **Diff them:**

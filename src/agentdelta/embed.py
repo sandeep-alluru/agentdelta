@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import threading
 from typing import Any
+
+# Suppress noisy HuggingFace Hub and tokenizer warnings before any model is loaded
+os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 import numpy as np
 
