@@ -317,6 +317,15 @@ agentdelta is not an observability platform — it is a **diff tool**. Use it al
 
 ---
 
+## Case Studies
+
+See how teams are using agentdelta in production:
+
+- [Catching Invisible Behavioral Regressions in a Fraud Detection Agent](docs/case-studies/fintech-ci-behavioral-regression.md)
+- [Behavioral Fingerprinting for FDA-Regulated AI Model Upgrades](docs/case-studies/healthtech-model-upgrade-audit.md)
+
+---
+
 ## Repository structure
 
 ```
