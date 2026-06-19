@@ -9,6 +9,7 @@ import click
 
 from agentdelta.diff import diff_traces
 from agentdelta.report import print_diff, to_json, to_markdown
+from agentdelta.score import compute_score
 from agentdelta.trace import AgentTrace
 
 
@@ -132,6 +133,84 @@ def inspect(trace_file: Path, run_id: str | None) -> None:
 
     console.print(table)
     console.print()
+
+
+@main.command()
+@click.argument("trace_a", type=click.Path(exists=True, path_type=Path))
+@click.argument("trace_b", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--pass-threshold",
+    type=float,
+    default=80.0,
+    show_default=True,
+    help="Score >= this is PASS.",
+)
+@click.option(
+    "--warn-threshold",
+    type=float,
+    default=60.0,
+    show_default=True,
+    help="Score >= this (but < pass) is WARN.",
+)
+@click.option(
+    "--fork-threshold",
+    type=float,
+    default=0.70,
+    show_default=True,
+    help="Similarity below this marks a fork point.",
+)
+@click.option(
+    "--match-threshold",
+    type=float,
+    default=0.85,
+    show_default=True,
+    help="Similarity above this is a match.",
+)
+def score(
+    trace_a: Path,
+    trace_b: Path,
+    pass_threshold: float,
+    warn_threshold: float,
+    fork_threshold: float,
+    match_threshold: float,
+) -> None:
+    """Compute a regression score and exit 0 (PASS/WARN) or 1 (FAIL).
+
+    TRACE_A is the baseline run; TRACE_B is the candidate run.
+
+    \b
+    Examples:
+      agentdelta score baseline.jsonl candidate.jsonl
+      agentdelta score baseline.jsonl candidate.jsonl --pass-threshold 90
+    """
+    run_a = AgentTrace.load(trace_a)
+    run_b = AgentTrace.load(trace_b)
+
+    result = diff_traces(
+        run_a,
+        run_b,
+        fork_threshold=fork_threshold,
+        match_threshold=match_threshold,
+    )
+    reg_score = compute_score(result, pass_threshold=pass_threshold, warn_threshold=warn_threshold)
+
+    verdict_colors = {"PASS": "green", "WARN": "yellow", "FAIL": "red"}
+    color = verdict_colors[reg_score.verdict]
+
+    click.echo(
+        click.style(f"[{reg_score.verdict}]", fg=color, bold=True)
+        + f"  overall={reg_score.overall:.1f}  "
+        f"structural={reg_score.structural:.1f}  "
+        f"semantic={reg_score.semantic:.1f}  "
+        f"tool_fidelity={reg_score.tool_fidelity:.1f}  "
+        f"fork_penalty={reg_score.fork_penalty:.1f}"
+    )
+    click.echo(
+        f"  thresholds: pass>={pass_threshold}  warn>={warn_threshold}"
+    )
+
+    if reg_score.verdict == "FAIL":
+        sys.exit(1)
 
 
 if __name__ == "__main__":

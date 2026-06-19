@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `RegressionScore` dataclass and `compute_score()` — composite 0-100 behavioral similarity
+  score with structural, semantic, tool-fidelity, and fork-penalty components for CI gates
+- `to_html()` — self-contained HTML diff report with color-coded side-by-side step table,
+  fork-point highlight, and embedded CSS (no external dependencies)
+- `BatchDiffResult`, `batch_diff()`, and `batch_from_directory()` — diff multiple trace
+  pairs in bulk; aggregate score and regression list across a directory of JSONL files
+- CLI command `agentdelta score <baseline> <candidate>` — prints regression score and
+  exits 0 (PASS/WARN) or 1 (FAIL) for easy CI integration
+- Exports in `__init__.py`: `RegressionScore`, `compute_score`, `BatchDiffResult`,
+  `batch_diff`, `batch_from_directory`, `to_html`
+
 ## [0.1.0] - 2026-06-17
 
 ### Added
