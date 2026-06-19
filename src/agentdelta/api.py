@@ -20,9 +20,7 @@ try:
     from fastapi import FastAPI, HTTPException
     from pydantic import BaseModel, Field
 except ImportError as exc:
-    raise ImportError(
-        "API server requires: pip install 'agentdelta[api]'"
-    ) from exc
+    raise ImportError("API server requires: pip install 'agentdelta[api]'") from exc
 
 from agentdelta import AgentTrace, diff_traces
 from agentdelta.report import to_json
@@ -32,7 +30,10 @@ app = FastAPI(
     title="agentdelta API",
     description="Semantic diff engine for AI agent behavior.",
     version="0.1.0",
-    license_info={"name": "MIT", "url": "https://github.com/sandeep-alluru/agentdelta/blob/main/LICENSE"},
+    license_info={
+        "name": "MIT",
+        "url": "https://github.com/sandeep-alluru/agentdelta/blob/main/LICENSE",
+    },
 )
 
 
@@ -82,6 +83,7 @@ def _load_trace_from_string(content: str, name: str) -> AgentTrace:
 async def health() -> dict[str, str]:
     """Liveness probe."""
     from agentdelta import __version__
+
     return {"status": "ok", "version": __version__}
 
 

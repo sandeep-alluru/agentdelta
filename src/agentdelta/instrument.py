@@ -34,9 +34,7 @@ class AgentdeltaCallback:
 
     # ── LangChain callback interface ──────────────────────────────────────────
 
-    def on_llm_start(
-        self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any
-    ) -> None:
+    def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -> None:
         """No-op — input prompts are not captured; only LLM output is recorded."""
 
     def on_llm_end(self, response: Any, **kwargs: Any) -> None:
@@ -49,13 +47,9 @@ class AgentdeltaCallback:
         node = TraceNode(step=step, node_type=NodeType.LLM, content=text[:2000])
         self.trace.add_node(node)
         if step > 1:
-            self.trace.add_edge(
-                TraceEdge(step - 1, step, EdgeType.LLM_DECISION, "llm_output")
-            )
+            self.trace.add_edge(TraceEdge(step - 1, step, EdgeType.LLM_DECISION, "llm_output"))
 
-    def on_tool_start(
-        self, serialized: dict[str, Any], input_str: str, **kwargs: Any
-    ) -> None:
+    def on_tool_start(self, serialized: dict[str, Any], input_str: str, **kwargs: Any) -> None:
         """Record a tool invocation as a ``NodeType.TOOL_CALL`` trace node."""
         tool_name = serialized.get("name", "unknown_tool")
         step = self._next_step()
@@ -63,21 +57,15 @@ class AgentdeltaCallback:
         node = TraceNode(step=step, node_type=NodeType.TOOL_CALL, content=content)
         self.trace.add_node(node)
         if step > 1:
-            self.trace.add_edge(
-                TraceEdge(step - 1, step, EdgeType.TOOL_CALL, tool_name)
-            )
+            self.trace.add_edge(TraceEdge(step - 1, step, EdgeType.TOOL_CALL, tool_name))
 
     def on_tool_end(self, output: str, **kwargs: Any) -> None:
         """Record a tool result as a ``NodeType.TOOL_RETURN`` trace node."""
         step = self._next_step()
-        node = TraceNode(
-            step=step, node_type=NodeType.TOOL_RETURN, content=str(output)[:500]
-        )
+        node = TraceNode(step=step, node_type=NodeType.TOOL_RETURN, content=str(output)[:500])
         self.trace.add_node(node)
         if step > 1:
-            self.trace.add_edge(
-                TraceEdge(step - 1, step, EdgeType.TOOL_RETURN, "tool_output")
-            )
+            self.trace.add_edge(TraceEdge(step - 1, step, EdgeType.TOOL_RETURN, "tool_output"))
 
     def on_chain_start(
         self, serialized: dict[str, Any], inputs: dict[str, Any], **kwargs: Any
@@ -102,9 +90,7 @@ class AgentdeltaCallback:
         )
         self.trace.add_node(node)
         if step > 1:
-            self.trace.add_edge(
-                TraceEdge(step - 1, step, EdgeType.SEQUENCE, "chain_end")
-            )
+            self.trace.add_edge(TraceEdge(step - 1, step, EdgeType.SEQUENCE, "chain_end"))
 
     def on_agent_action(self, action: Any, **kwargs: Any) -> None:
         """No-op — agent actions are captured via ``on_tool_start``."""

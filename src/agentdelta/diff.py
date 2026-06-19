@@ -31,17 +31,14 @@ class ForkPoint:
 
     def is_tool_change(self) -> bool:
         """Return True if the fork is a tool-selection or tool-return change."""
-        return (
-            self.node_a.node_type in (NodeType.TOOL_CALL, NodeType.TOOL_RETURN)
-            and self.node_b.node_type in (NodeType.TOOL_CALL, NodeType.TOOL_RETURN)
-        )
+        return self.node_a.node_type in (
+            NodeType.TOOL_CALL,
+            NodeType.TOOL_RETURN,
+        ) and self.node_b.node_type in (NodeType.TOOL_CALL, NodeType.TOOL_RETURN)
 
     def is_reasoning_change(self) -> bool:
         """Return True if the fork is an LLM reasoning divergence."""
-        return (
-            self.node_a.node_type == NodeType.LLM
-            and self.node_b.node_type == NodeType.LLM
-        )
+        return self.node_a.node_type == NodeType.LLM and self.node_b.node_type == NodeType.LLM
 
 
 @dataclass

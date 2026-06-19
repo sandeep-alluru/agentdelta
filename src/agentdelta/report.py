@@ -32,7 +32,7 @@ _STATUS_STYLE = {
 
 
 def _truncate(text: str, max_len: int = 72) -> str:
-    return text if len(text) <= max_len else text[:max_len - 1] + "…"
+    return text if len(text) <= max_len else text[: max_len - 1] + "…"
 
 
 def print_diff(
@@ -44,10 +44,7 @@ def print_diff(
     con = console or _console
 
     # Header
-    title = (
-        f"[bold]agentdelta[/bold]  "
-        f"[dim]{result.run_id_a}[/dim] vs [dim]{result.run_id_b}[/dim]"
-    )
+    title = f"[bold]agentdelta[/bold]  [dim]{result.run_id_a}[/dim] vs [dim]{result.run_id_b}[/dim]"
     con.print(Panel(title, expand=False))
 
     # Summary line

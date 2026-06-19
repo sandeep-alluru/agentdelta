@@ -22,12 +22,13 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Any
+from typing import Any, cast
 
 try:
     import mcp.server.stdio as _mcp_stdio
     import mcp.types as _mcp_types
     from mcp.server import Server as _Server
+
     _HAS_MCP = True
 except ImportError:
     _HAS_MCP = False
@@ -44,7 +45,7 @@ def _diff(
     result = diff_traces(
         trace_a, trace_b, fork_threshold=fork_threshold, match_threshold=match_threshold
     )
-    return json.loads(to_json(result))
+    return cast(dict[str, Any], json.loads(to_json(result)))
 
 
 def _inspect(path: str) -> dict[str, Any]:
@@ -53,12 +54,14 @@ def _inspect(path: str) -> dict[str, Any]:
     trace = AgentTrace.load(path)
     steps = []
     for node in trace.nodes:
-        steps.append({
-            "step": node.step,
-            "type": node.node_type.value,
-            "content_preview": node.content[:120],
-            "id": node.id,
-        })
+        steps.append(
+            {
+                "step": node.step,
+                "type": node.node_type.value,
+                "content_preview": node.content[:120],
+                "id": node.id,
+            }
+        )
     return {
         "run_id": trace.run_id,
         "total_nodes": len(trace.nodes),
@@ -69,7 +72,7 @@ def _inspect(path: str) -> dict[str, Any]:
 
 
 _RECORD_SNIPPETS = {
-    "langchain": '''\
+    "langchain": """\
 from agentdelta import record
 
 with record("baseline.jsonl", run_id="v1.0") as cb:
@@ -77,8 +80,8 @@ with record("baseline.jsonl", run_id="v1.0") as cb:
 
 with record("candidate.jsonl", run_id="v1.1") as cb:
     agent.invoke({"input": "..."}, config={"callbacks": [cb]})
-''',
-    "custom": '''\
+""",
+    "custom": """\
 from agentdelta import AgentTrace
 from agentdelta.trace import TraceNode, NodeType
 
@@ -89,7 +92,7 @@ trace.add_node(TraceNode(step=3, node_type=NodeType.TOOL_CALL, content="tool_nam
 trace.add_node(TraceNode(step=4, node_type=NodeType.TOOL_RETURN, content="result"))
 trace.add_node(TraceNode(step=5, node_type=NodeType.END, content="final answer"))
 trace.save("my_run.jsonl")
-''',
+""",
 }
 
 
@@ -116,11 +119,13 @@ def run_server() -> None:
                         "trace_a": {"type": "string", "description": "Path to baseline JSONL"},
                         "trace_b": {"type": "string", "description": "Path to candidate JSONL"},
                         "fork_threshold": {
-                            "type": "number", "default": 0.70,
+                            "type": "number",
+                            "default": 0.70,
                             "description": "Similarity below this marks a fork",
                         },
                         "match_threshold": {
-                            "type": "number", "default": 0.85,
+                            "type": "number",
+                            "default": 0.85,
                             "description": "Similarity above this is a match",
                         },
                     },

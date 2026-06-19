@@ -116,8 +116,10 @@ def inspect(trace_file: Path, run_id: str | None) -> None:
 
     trace = AgentTrace.load(trace_file)
 
-    console.print(f"\n[bold]Trace:[/bold] [dim]{trace.run_id}[/dim]  "
-                  f"[dim]{len(trace.nodes)} nodes / {len(trace.edges)} edges[/dim]\n")
+    console.print(
+        f"\n[bold]Trace:[/bold] [dim]{trace.run_id}[/dim]  "
+        f"[dim]{len(trace.nodes)} nodes / {len(trace.edges)} edges[/dim]\n"
+    )
 
     table = Table(show_header=True, header_style="bold", box=None, padding=(0, 1))
     table.add_column("Step", style="dim", width=5)
@@ -205,9 +207,7 @@ def score(
         f"tool_fidelity={reg_score.tool_fidelity:.1f}  "
         f"fork_penalty={reg_score.fork_penalty:.1f}"
     )
-    click.echo(
-        f"  thresholds: pass>={pass_threshold}  warn>={warn_threshold}"
-    )
+    click.echo(f"  thresholds: pass>={pass_threshold}  warn>={warn_threshold}")
 
     if reg_score.verdict == "FAIL":
         sys.exit(1)

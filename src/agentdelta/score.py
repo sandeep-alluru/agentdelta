@@ -86,9 +86,7 @@ def compute_score(
     from agentdelta.trace import NodeType
 
     baseline_tool_steps = [
-        s
-        for s in steps
-        if s.step_a is not None and s.step_a.node_type == NodeType.TOOL_CALL
+        s for s in steps if s.step_a is not None and s.step_a.node_type == NodeType.TOOL_CALL
     ]
     if baseline_tool_steps:
         matched_tools = sum(1 for s in baseline_tool_steps if s.status == "match")
@@ -113,12 +111,7 @@ def compute_score(
 
     # ── Overall score ─────────────────────────────────────────────────────────
     # Weighted combination
-    overall = (
-        0.25 * structural
-        + 0.35 * semantic
-        + 0.20 * tool_fidelity
-        + 0.20 * fork_penalty
-    )
+    overall = 0.25 * structural + 0.35 * semantic + 0.20 * tool_fidelity + 0.20 * fork_penalty
     overall = round(min(max(overall, 0.0), 100.0), 2)
 
     # ── Verdict ───────────────────────────────────────────────────────────────

@@ -107,12 +107,7 @@ def _esc(text: str, max_len: int = 120) -> str:
 
 def _stat_html(value: Any, label: str, css_class: str = "") -> str:
     cls = f' class="stat-value {css_class}"' if css_class else ' class="stat-value"'
-    return (
-        f'<div class="stat">'
-        f'<div{cls}>{value}</div>'
-        f'<div class="stat-label">{label}</div>'
-        f"</div>"
-    )
+    return f'<div class="stat"><div{cls}>{value}</div><div class="stat-label">{label}</div></div>'
 
 
 def to_html(diff_result: DiffResult, title: str = "agentdelta diff") -> str:
@@ -155,7 +150,7 @@ def to_html(diff_result: DiffResult, title: str = "agentdelta diff") -> str:
         fp = diff_result.fork_point
         fork_html = (
             '<div class="fork-box">'
-            f'<h3>⚡ First Fork at Step {fp.step_a}</h3>'
+            f"<h3>⚡ First Fork at Step {fp.step_a}</h3>"
             f"<p>{_esc(fp.description)}</p>"
             '<div class="fork-content">'
             '<div class="fork-side">'
