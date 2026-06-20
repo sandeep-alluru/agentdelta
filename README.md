@@ -338,6 +338,89 @@ agentdelta is not an observability platform — it is a **diff tool**. Use it al
 
 ---
 
+## Real-World Scenario
+
+**Fintech: Catching Silent Behavioral Regression in Loan Underwriting**
+
+A compliance team upgrades their loan-underwriting agent from `model=claude-sonnet-3-5` to `claude-sonnet-3-7`. Benchmarks stay flat. But the agent now calls `verify_income` before `pull_credit_score` — reordering the decision chain in a way that violates Regulation B for 18% of borderline applications.
+
+agentdelta catches this in CI before it reaches production:
+
+```python
+from agentdelta.instrument import AgentdeltaCallback
+from agentdelta import AgentTrace, diff_traces
+from agentdelta.report import print_diff
+
+
+class _FakeLLMResponse:
+    def __init__(self, text):
+        self.generations = [[type("G", (), {"text": text})()]]
+
+
+def build_loan_trace(run_id, first_tool, second_tool):
+    """Simulate a loan underwriting agent run with two sequential tool calls."""
+    cb = AgentdeltaCallback(run_id=run_id)
+    cb.on_chain_start({}, {"input": "Underwrite loan application #LN-8821."})
+    cb.on_llm_end(_FakeLLMResponse("I need to gather applicant data to assess creditworthiness."))
+
+    # First tool call — this is what changed between model versions
+    cb.on_tool_start({"name": first_tool}, "applicant_id='LN-8821'")
+    cb.on_tool_end('{"status": "ok", "result": "retrieved"}')
+    cb.on_llm_end(_FakeLLMResponse("First check complete. Running second verification."))
+
+    # Second tool call
+    cb.on_tool_start({"name": second_tool}, "applicant_id='LN-8821'")
+    cb.on_tool_end('{"status": "ok", "result": "retrieved"}')
+    cb.on_llm_end(_FakeLLMResponse("All checks complete. Loan approved."))
+
+    cb.on_chain_end({"output": "approved"})
+    return cb.trace
+
+
+# Baseline: claude-sonnet-3-5 called pull_credit_score first (Regulation B compliant)
+baseline = build_loan_trace(
+    run_id="sonnet-3-5-baseline",
+    first_tool="pull_credit_score",
+    second_tool="verify_income",
+)
+baseline.save("loan_baseline.jsonl")
+
+# Candidate: claude-sonnet-3-7 now calls verify_income first (Regulation B violation)
+candidate = build_loan_trace(
+    run_id="sonnet-3-7-candidate",
+    first_tool="verify_income",
+    second_tool="pull_credit_score",
+)
+candidate.save("loan_candidate.jsonl")
+
+# Load saved traces and diff
+trace_a = AgentTrace.load("loan_baseline.jsonl")
+trace_b = AgentTrace.load("loan_candidate.jsonl")
+
+result = diff_traces(trace_a, trace_b)
+print_diff(result)
+
+# Compliance gate: fail CI if the first tool call changed
+if result.has_regression and result.fork_point is not None:
+    fork = result.fork_point
+    baseline_tool = fork.baseline_step.tool_name if fork.baseline_step else None
+    candidate_tool = fork.candidate_step.tool_name if fork.candidate_step else None
+    if baseline_tool != candidate_tool:
+        print(
+            f"\n[COMPLIANCE ALERT] Tool call order changed at step {fork.step_index}:\n"
+            f"  baseline : {baseline_tool}\n"
+            f"  candidate: {candidate_tool}\n"
+            "Regulation B requires credit score to be evaluated before income verification.\n"
+            "18% of borderline approvals may now violate fair-lending rules.\n"
+            "Block this deployment and review the model upgrade."
+        )
+        raise SystemExit(1)
+```
+
+**What this catches that unit tests miss:** Unit tests verify the final answer ("approved"/"denied"). agentdelta catches *how* the agent got there — the tool calling order that determines whether Regulation B is satisfied.
+
+---
+
 ## Case Studies
 
 See how teams are using agentdelta in production:
