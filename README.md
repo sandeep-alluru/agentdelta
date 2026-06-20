@@ -479,6 +479,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide including how to add o
 
 ---
 
+---
+
+## Stay Updated
+
+Subscribe to [**The Silence Layer**](https://newsletter.salluru.dev) — weekly dispatches on production AI infrastructure, new releases, and the failure modes that production AI systems don't surface until it's too late.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
