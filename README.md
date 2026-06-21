@@ -403,13 +403,13 @@ print_diff(result)
 # Compliance gate: fail CI if the first tool call changed
 if result.has_regression and result.fork_point is not None:
     fork = result.fork_point
-    baseline_tool = fork.baseline_step.tool_name if fork.baseline_step else None
-    candidate_tool = fork.candidate_step.tool_name if fork.candidate_step else None
-    if baseline_tool != candidate_tool:
+    baseline_content = fork.node_a.content if fork.node_a else None
+    candidate_content = fork.node_b.content if fork.node_b else None
+    if baseline_content != candidate_content:
         print(
-            f"\n[COMPLIANCE ALERT] Tool call order changed at step {fork.step_index}:\n"
-            f"  baseline : {baseline_tool}\n"
-            f"  candidate: {candidate_tool}\n"
+            f"\n[COMPLIANCE ALERT] Tool call order changed at step {fork.step_a}:\n"
+            f"  baseline : {baseline_content}\n"
+            f"  candidate: {candidate_content}\n"
             "Regulation B requires credit score to be evaluated before income verification.\n"
             "18% of borderline approvals may now violate fair-lending rules.\n"
             "Block this deployment and review the model upgrade."

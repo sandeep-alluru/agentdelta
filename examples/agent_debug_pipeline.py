@@ -214,8 +214,8 @@ def main() -> None:
             # Show the diff to confirm the world-state change was recorded.
             print("(No staleness alerts — showing commit diff instead.)\n")
             diff = repo.diff(commit_a, commit_b)
-            print(f"  Facts added   : {[f.subject + ' ' + f.predicate + ' ' + f.object for f in diff.added]}")
-            print(f"  Facts removed : {[f.subject + ' ' + f.predicate + ' ' + f.object for f in diff.removed]}")
+            print(f"  Facts added   : {[f.subject + ' ' + f.predicate + ' ' + f.object for f in diff.added_facts]}")
+            print(f"  Facts removed : {[f.subject + ' ' + f.predicate + ' ' + f.object for f in diff.removed_facts]}")
             print(
                 "\nThe FICO-8 fact was retracted and replaced with FICO-9.\n"
                 "Decisions that depended on the original FICO-8 fact ID are stale."
