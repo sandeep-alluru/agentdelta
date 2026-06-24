@@ -1,19 +1,10 @@
-name: agentdelta
-displayName: "AgentDelta"
-description: "Semantic diff engine — find the exact decision fork between two agent runs"
-license: MIT
-homepage: https://github.com/sandeep-alluru/agentdelta
-repository: https://github.com/sandeep-alluru/agentdelta
-keywords:
-  - ai-agents
-  - diff
-  - behavioral-testing
-  - mcp
-  - observability
 startCommand:
   type: stdio
   configSchema:
     type: object
     properties: {}
   commandFunction: |-
-    (config) => ({ command: "python", args: ["-m", "agentdelta.mcp_server"] })
+    (config) => ({
+      command: 'uvx',
+      args: ['agentdelta-mcp']
+    })
