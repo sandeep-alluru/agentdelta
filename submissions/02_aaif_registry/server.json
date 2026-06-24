@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.sandeep-alluru/agentdelta",
+  "title": "AgentDelta",
+  "description": "Semantic diff engine for AI agent behavior \u2014 find the exact decision fork between two runs",
+  "version": "0.1.3",
+  "websiteUrl": "https://github.com/sandeep-alluru/agentdelta",
+  "repository": {
+    "url": "https://github.com/sandeep-alluru/agentdelta",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "agentdelta",
+      "version": "0.1.3",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

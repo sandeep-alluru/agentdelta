@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentdelta"
-version = "0.1.2"
+version = "0.1.3"
 description = "Semantic diff engine for AI agent behavior — find the exact decision fork between two runs"
 readme = "README.md"
 license = { file = "LICENSE" }

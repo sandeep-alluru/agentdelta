@@ -1,0 +1,40 @@
+{
+  "$schema": "https://agenticresourcediscovery.org/schema/v1/catalog.json",
+  "version": "1.0.0",
+  "name": "AgentDelta",
+  "description": "Semantic diff engine for AI agent behavior — find the exact decision fork between two runs",
+  "publisher": {
+    "name": "Sandeep Alluru",
+    "email": "onepuncchh@gmail.com",
+    "url": "https://github.com/sandeep-alluru"
+  },
+  "tools": [
+    {
+      "id": "io.github.sandeep-alluru/agentdelta",
+      "name": "agentdelta",
+      "title": "AgentDelta",
+      "description": "Semantic diff engine for AI agent behavior — find the exact decision fork between two runs",
+      "version": "0.1.2",
+      "protocol": "mcp",
+      "transport": "stdio",
+      "install": {
+        "pypi": {
+          "package": "agentdelta",
+          "extras": [
+            "mcp"
+          ],
+          "runtimeHint": "uvx"
+        }
+      },
+      "invocation": {
+        "command": "agentdelta-mcp"
+      },
+      "repository": {
+        "url": "https://github.com/sandeep-alluru/agentdelta",
+        "source": "github"
+      },
+      "homepage": "https://github.com/sandeep-alluru/agentdelta",
+      "license": "MIT"
+    }
+  ]
+}
