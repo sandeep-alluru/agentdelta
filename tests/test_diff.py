@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from agentdelta.diff import DiffResult, ForkPoint, StepDiff, diff_traces
+from agentdelta.diff import DiffResult, ForkPoint, StepDiff, _describe_fork, diff_traces
 from agentdelta.trace import NodeType, TraceNode
 
 
@@ -133,3 +133,95 @@ def test_describe_fork_tool_call_different_tools(simple_trace_a, simple_trace_b_
         # Should mention something about the change
         desc = result.fork_point.description.lower()
         assert any(word in desc for word in ["tool", "changed", "diverged", "similarity", "step"])
+
+
+def test_describe_fork_same_tool_different_args() -> None:
+    """Same tool name but different args should produce 'arguments diverged' description."""
+    from agentdelta.trace import AgentTrace, EdgeType, TraceEdge
+
+    a = AgentTrace(run_id="a")
+    b = AgentTrace(run_id="b")
+    a.add_node(TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='redis cache')"))
+    b.add_node(TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='postgres database performance')"))
+    result = diff_traces(a, b, fork_threshold=0.99)
+    if result.fork_point is not None:
+        # Same tool name → should report argument divergence
+        assert "search" in result.fork_point.description or "argument" in result.fork_point.description.lower() or "changed" in result.fork_point.description.lower()
+
+
+def test_describe_fork_llm_reasoning_divergence() -> None:
+    """Two LLM nodes that diverge should produce a 'reasoning' description."""
+    from agentdelta.trace import AgentTrace
+
+    a = AgentTrace(run_id="a")
+    b = AgentTrace(run_id="b")
+    a.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="I will use cache_tool to speed up retrieval"))
+    b.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="Let me call the database for fresh data"))
+    result = diff_traces(a, b, fork_threshold=0.99)
+    if result.fork_point is not None:
+        desc = result.fork_point.description.lower()
+        assert "reasoning" in desc or "diverged" in desc or "similarity" in desc
+
+
+def test_describe_fork_type_mismatch() -> None:
+    """Nodes of different types (e.g. LLM vs TOOL_CALL) should produce a type-change description."""
+    from agentdelta.trace import AgentTrace
+
+    a = AgentTrace(run_id="a")
+    b = AgentTrace(run_id="b")
+    a.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="I will answer directly without tools"))
+    b.add_node(TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='answer')"))
+    result = diff_traces(a, b, fork_threshold=0.99)
+    if result.fork_point is not None:
+        desc = result.fork_point.description.lower()
+        assert "changed" in desc or "type" in desc or "similarity" in desc
+
+
+def test_empty_trace_vs_nonempty() -> None:
+    """Diff of an empty trace vs a non-empty trace should produce only added steps."""
+    from agentdelta.trace import AgentTrace
+
+    a = AgentTrace(run_id="empty")
+    b = AgentTrace(run_id="b")
+    b.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="only in b"))
+    result = diff_traces(a, b)
+    assert result.summary["added"] >= 1
+    assert result.summary["removed"] == 0
+
+
+# ── Direct _describe_fork branch coverage ─────────────────────────────────────
+
+def test_describe_fork_two_tool_calls_different_names() -> None:
+    """_describe_fork should mention tool selection change when tool names differ."""
+    na = TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search_tool(query='x')")
+    nb = TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="fetch_tool(url='y')")
+    desc = _describe_fork(na, nb, 0.3)
+    assert "Tool selection changed" in desc
+    assert "search_tool" in desc
+    assert "fetch_tool" in desc
+
+
+def test_describe_fork_two_tool_calls_same_name() -> None:
+    """_describe_fork should mention argument divergence when tool name is the same."""
+    na = TraceNode(step=2, node_type=NodeType.TOOL_CALL, content="search(query='cats')")
+    nb = TraceNode(step=2, node_type=NodeType.TOOL_CALL, content="search(query='dogs')")
+    desc = _describe_fork(na, nb, 0.5)
+    assert "arguments diverged" in desc
+
+
+def test_describe_fork_llm_to_llm() -> None:
+    """_describe_fork should report reasoning divergence for LLM→LLM pairs."""
+    na = TraceNode(step=3, node_type=NodeType.LLM, content="I will use tool A")
+    nb = TraceNode(step=3, node_type=NodeType.LLM, content="I will use tool B")
+    desc = _describe_fork(na, nb, 0.4)
+    assert "Reasoning path diverged" in desc
+
+
+def test_describe_fork_type_mismatch_fallback() -> None:
+    """_describe_fork should fall back to a 'Step type changed' message for mixed types."""
+    na = TraceNode(step=4, node_type=NodeType.LLM, content="reasoning")
+    nb = TraceNode(step=4, node_type=NodeType.TOOL_CALL, content="tool()")
+    desc = _describe_fork(na, nb, 0.2)
+    assert "Step type changed" in desc
+    assert "llm" in desc
+    assert "tool_call" in desc

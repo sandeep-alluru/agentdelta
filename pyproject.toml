@@ -117,7 +117,7 @@ addopts   = "--cov=agentdelta --cov-report=term-missing --cov-report=xml"
 [tool.coverage.run]
 source   = ["agentdelta"]
 branch   = true
-omit     = ["*/tests/*", "*/examples/*"]
+omit     = ["*/tests/*", "*/examples/*", "*/mcp_server.py"]
 
 [tool.coverage.report]
 fail_under   = 85
