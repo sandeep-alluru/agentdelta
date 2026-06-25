@@ -105,7 +105,7 @@ jobs:
 
       - name: Post PR comment
         if: steps.diff.outputs.has_traces == 'true'
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           path: diff_output.md
 
