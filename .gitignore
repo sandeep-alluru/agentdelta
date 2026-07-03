@@ -34,3 +34,5 @@ traces/*.jsonl
 .idea/
 .vscode/
 *.swp
+submissions/
+uv.lock
