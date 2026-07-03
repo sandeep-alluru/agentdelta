@@ -508,3 +508,5 @@ llm  agents  langchain  diff  regression-testing  mcp  behavioral-testing  ci-cd
 *If agentdelta saved you from a silent behavioral regression, consider giving it a ⭐*
 
 </div>
+
+<!-- mcp-name: io.github.sandeep-alluru/agentdelta -->
