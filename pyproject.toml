@@ -50,6 +50,10 @@ dev = [
     "ruff>=0.9",
     "mypy>=1.10",
     "pre-commit>=3.0",
+    # test_api.py imports fastapi's TestClient; keep the API stack available under dev
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "httpx>=0.27",
 ]
 docs = [
     "mkdocs>=1.6",
@@ -107,6 +111,13 @@ warn_unused_configs      = true
 disallow_untyped_defs    = true
 disallow_any_generics    = true
 check_untyped_defs       = true
+
+# numpy 2.x ships stubs using 3.12-only `type X = ...` syntax which mypy rejects
+# under python_version 3.10; skip following them (our own code stays fully checked).
+[[tool.mypy.overrides]]
+module = "numpy.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
 
 # ── Pytest ────────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]

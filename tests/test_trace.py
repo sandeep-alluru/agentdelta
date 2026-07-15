@@ -123,6 +123,7 @@ def test_edge_from_dict_missing_label():
 def test_trace_load_with_metadata(simple_trace_a):
     """AgentTrace.load() should preserve metadata from the trace_meta line."""
     import tempfile
+
     trace = AgentTrace(run_id="meta_test", metadata={"version": "1.0", "env": "ci"})
     trace.add_node(TraceNode(step=1, node_type=NodeType.START, content="start"))
     with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False) as f:
@@ -140,10 +141,11 @@ def test_trace_load_with_metadata(simple_trace_a):
 def test_trace_load_skips_blank_lines():
     """AgentTrace.load() should not crash on blank lines in the JSONL file."""
     import tempfile
+
     with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False, mode="w") as f:
         path = Path(f.name)
         f.write('{"type": "trace_meta", "run_id": "blank_test"}\n')
-        f.write('\n')  # blank line
+        f.write("\n")  # blank line
         f.write('{"type": "node", "step": 1, "node_type": "start", "content": "hi"}\n')
     try:
         restored = AgentTrace.load(path)

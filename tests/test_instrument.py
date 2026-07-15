@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from typing import ClassVar
 
 from agentdelta.instrument import AgentdeltaCallback, record
 from agentdelta.trace import AgentTrace, NodeType
@@ -104,7 +105,7 @@ def test_on_llm_end_fallback_when_generations_empty():
     cb = AgentdeltaCallback(run_id="empty_gen")
 
     class _EmptyGens:
-        generations: list = []
+        generations: ClassVar[list] = []
 
     cb.on_llm_end(_EmptyGens())
     assert len(cb.trace.nodes) == 1

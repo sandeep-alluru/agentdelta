@@ -53,7 +53,9 @@ def forked_traces() -> tuple[AgentTrace, AgentTrace]:
     return a, b
 
 
-def test_compute_score_returns_regression_score(identical_traces: tuple[AgentTrace, AgentTrace]) -> None:
+def test_compute_score_returns_regression_score(
+    identical_traces: tuple[AgentTrace, AgentTrace],
+) -> None:
     """compute_score must return a RegressionScore dataclass."""
     a, b = identical_traces
     diff = diff_traces(a, b)
@@ -236,7 +238,9 @@ def test_warn_verdict_between_thresholds(forked_traces: tuple[AgentTrace, AgentT
     diff = diff_traces(a, b)
     score = compute_score(diff)
     # Use thresholds that bracket the actual score to force WARN
-    forced_warn = compute_score(diff, pass_threshold=score.overall + 1, warn_threshold=score.overall - 1)
+    forced_warn = compute_score(
+        diff, pass_threshold=score.overall + 1, warn_threshold=score.overall - 1
+    )
     assert forced_warn.verdict == "WARN"
 
 
@@ -280,14 +284,24 @@ def test_fork_penalty_zero_when_single_baseline_node_with_fork() -> None:
         description="reasoning diverged",
     )
     # One step in baseline (step_a is not None), one in candidate — single baseline node
-    step = StepDiff(step_a=node_a, step_b=node_b, similarity=0.3, status="changed", summary="diverged")
+    step = StepDiff(
+        step_a=node_a, step_b=node_b, similarity=0.3, status="changed", summary="diverged"
+    )
     diff = DiffResult(
         run_id_a="a",
         run_id_b="b",
         steps=[step],
         fork_point=fork,
-        summary={"total_steps": 1, "matched": 0, "changed": 1, "added": 0,
-                 "removed": 0, "similarity_pct": 0.0, "has_regression": True, "fork_step": 1},
+        summary={
+            "total_steps": 1,
+            "matched": 0,
+            "changed": 1,
+            "added": 0,
+            "removed": 0,
+            "similarity_pct": 0.0,
+            "has_regression": True,
+            "fork_step": 1,
+        },
     )
     score = compute_score(diff)
     # baseline_nodes == 1 → fork_penalty == 0.0

@@ -22,6 +22,7 @@ def _make_trace_jsonl(run_id: str, steps: list[tuple[NodeType, str]]) -> str:
 
     import tempfile
     from pathlib import Path
+
     with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
         trace.save(f.name)
         tmp = f.name

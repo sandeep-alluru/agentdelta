@@ -103,7 +103,7 @@ class DiffResult:
         return [s for s in self.steps if s.status == "removed"]
 
 
-def _describe_fork(na: TraceNode, nb: TraceNode, similarity: float) -> str:  # noqa: D401
+def _describe_fork(na: TraceNode, nb: TraceNode, similarity: float) -> str:
     if na.node_type == NodeType.TOOL_CALL and nb.node_type == NodeType.TOOL_CALL:
         tool_a = na.content.split("(")[0].strip()
         tool_b = nb.content.split("(")[0].strip()

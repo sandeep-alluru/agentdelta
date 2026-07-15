@@ -86,4 +86,5 @@ def test_version_flag():
     result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
     import agentdelta
+
     assert agentdelta.__version__ in result.output

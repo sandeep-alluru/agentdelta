@@ -109,7 +109,10 @@ def test_to_markdown_truncates_long_changed_list():
     """More than 20 changed steps should append a 'more rows' truncation line."""
     # Build two traces with 25 different LLM steps to force 25 changed rows
     steps_a = [(NodeType.LLM, f"baseline reasoning step {i}") for i in range(25)]
-    steps_b = [(NodeType.LLM, f"candidate reasoning step {i} — completely different path") for i in range(25)]
+    steps_b = [
+        (NodeType.LLM, f"candidate reasoning step {i} — completely different path")
+        for i in range(25)
+    ]
     a = _make_trace("a", steps_a)
     b = _make_trace("b", steps_b)
     result = diff_traces(a, b, fork_threshold=0.99, match_threshold=0.999)
@@ -122,6 +125,7 @@ def test_to_markdown_truncates_long_changed_list():
 def test_print_diff_no_fork(simple_trace_a, simple_trace_b_match):
     """print_diff should run without errors on a no-fork diff."""
     import io
+
     result = diff_traces(simple_trace_a, simple_trace_b_match)
     buf = io.StringIO()
     con = Console(file=buf, highlight=False)
@@ -133,6 +137,7 @@ def test_print_diff_no_fork(simple_trace_a, simple_trace_b_match):
 def test_print_diff_with_fork(simple_trace_a, simple_trace_b_fork):
     """print_diff should include fork-point panel when a fork is present."""
     import io
+
     result = diff_traces(simple_trace_a, simple_trace_b_fork, fork_threshold=0.70)
     buf = io.StringIO()
     con = Console(file=buf, highlight=False)
@@ -146,6 +151,7 @@ def test_print_diff_with_fork(simple_trace_a, simple_trace_b_fork):
 def test_print_diff_show_matches(simple_trace_a, simple_trace_b_match):
     """print_diff with show_matches=True should render match rows in the table."""
     import io
+
     result = diff_traces(simple_trace_a, simple_trace_b_match)
     buf = io.StringIO()
     con = Console(file=buf, highlight=False)

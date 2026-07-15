@@ -21,12 +21,14 @@ def _make_trace(run_id: str, steps: list[tuple[NodeType, str]]) -> AgentTrace:
 def test_has_mcp_flag_is_bool() -> None:
     """_HAS_MCP must be a boolean."""
     from agentdelta import mcp_server
+
     assert isinstance(mcp_server._HAS_MCP, bool)
 
 
 def test_run_server_exits_when_mcp_missing() -> None:
     """run_server() should exit with code 1 when MCP is not available."""
     import agentdelta.mcp_server as mcp_mod
+
     with patch.object(mcp_mod, "_HAS_MCP", False):
         with pytest.raises(SystemExit) as exc_info:
             mcp_mod.run_server()
@@ -95,6 +97,7 @@ def test_inspect_helper_returns_dict() -> None:
 def test_record_snippets_langchain() -> None:
     """_RECORD_SNIPPETS should have a 'langchain' entry with record() usage."""
     from agentdelta.mcp_server import _RECORD_SNIPPETS
+
     assert "langchain" in _RECORD_SNIPPETS
     assert "record" in _RECORD_SNIPPETS["langchain"]
 
@@ -102,5 +105,6 @@ def test_record_snippets_langchain() -> None:
 def test_record_snippets_custom() -> None:
     """_RECORD_SNIPPETS should have a 'custom' entry with AgentTrace usage."""
     from agentdelta.mcp_server import _RECORD_SNIPPETS
+
     assert "custom" in _RECORD_SNIPPETS
     assert "AgentTrace" in _RECORD_SNIPPETS["custom"]

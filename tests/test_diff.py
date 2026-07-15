@@ -33,8 +33,16 @@ def test_result_has_run_ids(simple_trace_a, simple_trace_b_match):
 
 def test_summary_keys_present(simple_trace_a, simple_trace_b_match):
     result = diff_traces(simple_trace_a, simple_trace_b_match)
-    required = {"total_steps", "matched", "changed", "added", "removed",
-                "similarity_pct", "has_regression", "fork_step"}
+    required = {
+        "total_steps",
+        "matched",
+        "changed",
+        "added",
+        "removed",
+        "similarity_pct",
+        "has_regression",
+        "fork_step",
+    }
     assert required.issubset(result.summary.keys())
 
 
@@ -137,16 +145,28 @@ def test_describe_fork_tool_call_different_tools(simple_trace_a, simple_trace_b_
 
 def test_describe_fork_same_tool_different_args() -> None:
     """Same tool name but different args should produce 'arguments diverged' description."""
-    from agentdelta.trace import AgentTrace, EdgeType, TraceEdge
+    from agentdelta.trace import AgentTrace
 
     a = AgentTrace(run_id="a")
     b = AgentTrace(run_id="b")
-    a.add_node(TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='redis cache')"))
-    b.add_node(TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='postgres database performance')"))
+    a.add_node(
+        TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='redis cache')")
+    )
+    b.add_node(
+        TraceNode(
+            step=1,
+            node_type=NodeType.TOOL_CALL,
+            content="search(query='postgres database performance')",
+        )
+    )
     result = diff_traces(a, b, fork_threshold=0.99)
     if result.fork_point is not None:
         # Same tool name → should report argument divergence
-        assert "search" in result.fork_point.description or "argument" in result.fork_point.description.lower() or "changed" in result.fork_point.description.lower()
+        assert (
+            "search" in result.fork_point.description
+            or "argument" in result.fork_point.description.lower()
+            or "changed" in result.fork_point.description.lower()
+        )
 
 
 def test_describe_fork_llm_reasoning_divergence() -> None:
@@ -155,8 +175,14 @@ def test_describe_fork_llm_reasoning_divergence() -> None:
 
     a = AgentTrace(run_id="a")
     b = AgentTrace(run_id="b")
-    a.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="I will use cache_tool to speed up retrieval"))
-    b.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="Let me call the database for fresh data"))
+    a.add_node(
+        TraceNode(
+            step=1, node_type=NodeType.LLM, content="I will use cache_tool to speed up retrieval"
+        )
+    )
+    b.add_node(
+        TraceNode(step=1, node_type=NodeType.LLM, content="Let me call the database for fresh data")
+    )
     result = diff_traces(a, b, fork_threshold=0.99)
     if result.fork_point is not None:
         desc = result.fork_point.description.lower()
@@ -169,7 +195,9 @@ def test_describe_fork_type_mismatch() -> None:
 
     a = AgentTrace(run_id="a")
     b = AgentTrace(run_id="b")
-    a.add_node(TraceNode(step=1, node_type=NodeType.LLM, content="I will answer directly without tools"))
+    a.add_node(
+        TraceNode(step=1, node_type=NodeType.LLM, content="I will answer directly without tools")
+    )
     b.add_node(TraceNode(step=1, node_type=NodeType.TOOL_CALL, content="search(query='answer')"))
     result = diff_traces(a, b, fork_threshold=0.99)
     if result.fork_point is not None:
@@ -190,6 +218,7 @@ def test_empty_trace_vs_nonempty() -> None:
 
 
 # ── Direct _describe_fork branch coverage ─────────────────────────────────────
+
 
 def test_describe_fork_two_tool_calls_different_names() -> None:
     """_describe_fork should mention tool selection change when tool names differ."""

@@ -68,6 +68,7 @@ def forked_diff() -> DiffResult:
 
 # ── Test 1: to_html() with a matched diff (no regression) ────────────────────
 
+
 def test_to_html_matched_no_regression(matched_diff: DiffResult) -> None:
     """to_html() on a matched diff should return an HTML string with no regression text."""
     html = to_html(matched_diff)
@@ -84,6 +85,7 @@ def test_to_html_matched_returns_pass_verdict(matched_diff: DiffResult) -> None:
 
 
 # ── Test 2: to_html() with a fork point ──────────────────────────────────────
+
 
 def test_to_html_with_fork_point(forked_diff: DiffResult) -> None:
     """A diff with a fork point should include fork information in the HTML."""
@@ -103,6 +105,7 @@ def test_to_html_fork_shows_regression(forked_diff: DiffResult) -> None:
 
 # ── Test 3: to_html() with custom title ──────────────────────────────────────
 
+
 def test_to_html_custom_title(matched_diff: DiffResult) -> None:
     """Custom title should appear in the output HTML."""
     custom_title = "My Custom Report Title"
@@ -118,6 +121,7 @@ def test_to_html_default_title(matched_diff: DiffResult) -> None:
 
 # ── Test 4: to_html() with empty traces ──────────────────────────────────────
 
+
 def test_to_html_empty_traces() -> None:
     """to_html() with two empty traces should still return valid HTML."""
     a = AgentTrace(run_id="empty_a")
@@ -130,6 +134,7 @@ def test_to_html_empty_traces() -> None:
 
 
 # ── Test 5: HTML validity (structure) ────────────────────────────────────────
+
 
 def test_to_html_contains_html_tags(matched_diff: DiffResult) -> None:
     """Output must be a complete HTML document with required structural tags."""
@@ -148,6 +153,7 @@ def test_to_html_contains_table_headers(matched_diff: DiffResult) -> None:
 
 
 # ── Test 6: Fork point highlighted when has_regression=True ──────────────────
+
 
 def test_to_html_fork_here_class_when_regression(forked_diff: DiffResult) -> None:
     """When a fork point exists, the row with the fork should have 'fork-here' CSS class."""
