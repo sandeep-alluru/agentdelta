@@ -20,23 +20,20 @@ def _make_trace(run_id: str, steps: list[tuple[NodeType, str]]) -> AgentTrace:
 
 @pytest.fixture
 def matched_diff() -> DiffResult:
-    """DiffResult with two nearly identical traces — no regression."""
-    a = _make_trace(
-        "run_a",
-        [
-            (NodeType.START, "What is 2 + 2?"),
-            (NodeType.LLM, "The answer is 4."),
-            (NodeType.END, "4"),
-        ],
-    )
-    b = _make_trace(
-        "run_b",
-        [
-            (NodeType.START, "What is 2 + 2?"),
-            (NodeType.LLM, "The answer is four."),
-            (NodeType.END, "four"),
-        ],
-    )
+    """DiffResult with two matched traces — no regression.
+
+    Content is identical across the two runs so the fork/no-fork verdict is
+    deterministic. Using near-but-not-equal content (e.g. "4" vs "four") makes
+    the verdict depend on embedding similarity, which varies across platforms
+    (Linux vs macOS arm64) and flakes this assertion.
+    """
+    steps = [
+        (NodeType.START, "What is 2 + 2?"),
+        (NodeType.LLM, "The answer is 4."),
+        (NodeType.END, "4"),
+    ]
+    a = _make_trace("run_a", steps)
+    b = _make_trace("run_b", steps)
     return diff_traces(a, b)
 
 
