@@ -15,9 +15,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from agentdelta.diff import DiffResult, diff_traces
-from agentdelta.score import RegressionScore, compute_score
 from agentdelta.trace import AgentTrace
+
+# Lazy imports for diff/score keep the empty-trace FAIL_LOUD path free of
+# heavy deps (numpy / sentence-transformers) so eagle-eyes dogfood can call
+# the gate without a full runtime install.
 
 
 class ClosedLoopError(ValueError):
@@ -42,7 +44,7 @@ class GateOutcome:
     verdict: str
     reason: str
     exit_code: int
-    score: RegressionScore | None = None
+    score: Any = None  # RegressionScore | None — typed loosely to avoid eager import
     run_id_a: str | None = None
     run_id_b: str | None = None
     has_regression: bool = False
@@ -132,7 +134,17 @@ def gate_traces(
         return _fail_loud("empty candidate trace — empty output is not a pass", run_a, run_b)
 
     try:
-        diff: DiffResult = diff_traces(
+        from agentdelta.diff import diff_traces
+        from agentdelta.score import compute_score
+    except Exception as exc:  # noqa: BLE001
+        return _fail_loud(
+            f"scoring stack unavailable: {exc.__class__.__name__}: {exc}",
+            run_a,
+            run_b,
+        )
+
+    try:
+        diff = diff_traces(
             trace_a,
             trace_b,
             fork_threshold=fork_threshold,
