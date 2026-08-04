@@ -510,3 +510,7 @@ llm  agents  langchain  diff  regression-testing  mcp  behavioral-testing  ci-cd
 </div>
 
 <!-- mcp-name: io.github.sandeep-alluru/agentdelta -->
+
+## Closed loop / Non-Ornament
+
+See [docs/CLOSED_LOOP.md](docs/CLOSED_LOOP.md) for when this library is load-bearing vs ornamental, and when **not** to use it.
