@@ -35,3 +35,7 @@ Do not call from product agents as free MCP decoration; do not treat as final-an
 ## Daily rotation note
 
 This file exists so pillar **C (closed loop)** can rise with real wiring over time. Prefer small daily commits that move a checkbox toward done.
+
+## Auto-run 2026-08-04
+- pytest_rc: 1
+- node: clawer-samurai-2
