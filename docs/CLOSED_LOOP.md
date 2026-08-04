@@ -1,6 +1,6 @@
 # Closed loop — `agentdelta`
 
-**Status:** stub (eagle-eyes Phase 0 / 2026-08-04)  
+**Status:** reader wired (eagle-eyes / 2026-08-04)  
 **Owner loop:** L4
 
 ## Load-bearing job
@@ -9,11 +9,13 @@ Behavioral / path diff between agent runs (CI regression)
 
 ## Who reads the output?
 
-CI job or eagle-eyes verify step compares two traces
+- Library API: `agentdelta.gate_traces` / `assert_no_regression` (`closed_loop.py`)
+- CLI: `agentdelta score …` / `agentdelta diff --exit-code`
+- CI job or eagle-eyes `dogfood_verify` compares two traces and acts on `exit_code`
 
 ## What outcome changes?
 
-PR fails or alert if tool/reasoning path regresses
+PR / gate fails if tool/reasoning path regresses; empty traces → `FAIL_LOUD` (exit 2), never silent pass
 
 ## When NOT to use (anti-ornament)
 
@@ -21,9 +23,9 @@ Do not call from product agents as free MCP decoration; do not treat as final-an
 
 ## Non-Ornament checklist
 
-- [ ] Reader implemented in CI, gate, or eagle-eyes script
-- [ ] Empty/wrong output fails loudly
-- [ ] Not exposed as free MCP in product agents
+- [x] Reader implemented in CI, gate, or eagle-eyes script (`gate_traces` + tests)
+- [x] Empty/wrong output fails loudly (`FAIL_LOUD`, exit 2)
+- [x] Not exposed as free MCP in product agents (import/CI gate only)
 - [ ] Linked gap IDs in mem0 when improving
 
 ## Related failures (farm memory)
@@ -34,7 +36,7 @@ Do not call from product agents as free MCP decoration; do not treat as final-an
 
 ## Daily rotation note
 
-This file exists so pillar **C (closed loop)** can rise with real wiring over time. Prefer small daily commits that move a checkbox toward done.
+Prefer small daily commits that move remaining checkboxes or raise scorer pillars (G/H/T).
 
 ## Auto-run 2026-08-04
 - pytest_rc: 1
