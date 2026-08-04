@@ -3,16 +3,27 @@ updates:
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 3
     labels:
       - dependencies
+    groups:
+      pip-minor:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 1
     labels:
       - dependencies
       - ci
+    groups:
+      github-actions:
+        patterns:
+          - "*"
