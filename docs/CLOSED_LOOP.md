@@ -9,13 +9,14 @@ Behavioral / path diff between agent runs (CI regression)
 
 ## Who reads the output?
 
-- Library API: `agentdelta.gate_traces` / `assert_no_regression` (`closed_loop.py`)
+- Library API: `agentdelta.gate_traces` / `gate_from_disk` / `e2e_reader_after_write` / `assert_no_regression` (`closed_loop.py`)
 - CLI: `agentdelta score …` / `agentdelta diff --exit-code`
 - CI job or eagle-eyes `dogfood_verify` compares two traces and acts on `exit_code`
 
 ## What outcome changes?
 
-PR / gate fails if tool/reasoning path regresses; empty traces → `FAIL_LOUD` (exit 2), never silent pass
+PR / gate fails if tool/reasoning path regresses; empty traces → `FAIL_LOUD` (exit 2), never silent pass.
+**WRITER-NOT-READER:** path fingerprint diverges + same final answer → never silent PASS; content-swap e2e must re-judge via disk reader.
 
 ## When NOT to use (anti-ornament)
 
