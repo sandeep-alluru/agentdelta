@@ -1,12 +1,14 @@
-"""Closed-loop reader/gate for agentdelta (Non-Ornament L1).
+"""Closed-loop reader/gate for agentdelta (L1 + WRITER-NOT-READER + TRAJDEBUG).
 
 Who reads the output?
   CI jobs, eagle-eyes ``dogfood_verify``, or any gate that must *fail loudly*
-  when traces are empty, malformed, or behaviorally regress.
+  when traces are empty, malformed, or behaviorally regress; trajectory
+  scanners that must refuse claimed success after intermediate errors.
 
 What outcome changes?
   Returns a structured ``GateOutcome`` with ``exit_code`` suitable for
   ``sys.exit`` — empty/wrong output is never a silent PASS.
+  Intermediate tool/LLM failures with a clean END claim → FAIL (TRAJDEBUG).
 
 WRITER-NOT-READER (farm lesson):
   Fixes that only touch the *writer* (save path, cache key, in-memory object)
@@ -17,16 +19,22 @@ WRITER-NOT-READER (farm lesson):
   * :func:`gate_from_disk` — reader always reloads JSONL from disk
   * :func:`e2e_reader_after_write` — write then gate via disk only
   * answer-only collapse refusal inside :func:`gate_traces`
+
+TRAJDEBUG (public arXiv 2608.06346):
+  Long-horizon agents hide critical intermediate failures when only the final
+  answer is inspected. :func:`gate_error_lifecycle` walks the error lifecycle
+  and refuses claimed success with unrecovered intermediate errors.
 """
 
 from __future__ import annotations
 
 import hashlib
-from dataclasses import asdict, dataclass
+import re
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
-from agentdelta.trace import AgentTrace, NodeType
+from agentdelta.trace import AgentTrace, NodeType, TraceNode
 
 # Lazy imports for diff/score keep the empty-trace FAIL_LOUD path free of
 # heavy deps (numpy / sentence-transformers) so eagle-eyes dogfood can call
@@ -39,7 +47,7 @@ class ClosedLoopError(ValueError):
 
 @dataclass(frozen=True)
 class GateOutcome:
-    """Result of a closed-loop read of two agent traces.
+    """Result of a closed-loop read of agent traces or error lifecycle.
 
     Attributes:
         ok: True only when the gate would let a pipeline continue (PASS/WARN).
@@ -51,6 +59,9 @@ class GateOutcome:
         has_regression: Whether a behavioral fork / path divergence was detected.
         path_fingerprint_a / path_fingerprint_b: Full-path ids when scored.
         answer_fingerprint_a / answer_fingerprint_b: END-only ids when scored.
+        error_step_count: Failed intermediate steps (TRAJDEBUG).
+        critical_step: First unrecovered failure step number when present.
+        human_required: True when intermediate errors need human review.
     """
 
     ok: bool
@@ -65,6 +76,9 @@ class GateOutcome:
     path_fingerprint_b: str | None = None
     answer_fingerprint_a: str | None = None
     answer_fingerprint_b: str | None = None
+    error_step_count: int = 0
+    critical_step: int | None = None
+    human_required: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise for JSON reports (eagle-eyes dogfood, CI artifacts)."""
@@ -80,6 +94,9 @@ class GateOutcome:
             "path_fingerprint_b": self.path_fingerprint_b,
             "answer_fingerprint_a": self.answer_fingerprint_a,
             "answer_fingerprint_b": self.answer_fingerprint_b,
+            "error_step_count": self.error_step_count,
+            "critical_step": self.critical_step,
+            "human_required": self.human_required,
             "score": None,
         }
         if self.score is not None:
@@ -417,6 +434,312 @@ def assert_no_regression(
     Useful in unit tests and scripts that prefer exceptions over exit codes.
     """
     outcome = gate_traces(baseline, candidate, **kwargs)
+    if not outcome.ok:
+        raise ClosedLoopError(f"{outcome.verdict}: {outcome.reason}")
+    return outcome
+
+
+# ---------------------------------------------------------------------------
+# TRAJDEBUG — error lifecycle on long-horizon trajectories
+# ---------------------------------------------------------------------------
+
+_ERROR_CONTENT_RE = re.compile(
+    r"(?i)\b(error|exception|traceback|failed|failure|timeout|refused)\b"
+)
+_FAIL_STATUSES = frozenset(
+    {"error", "fail", "failed", "failure", "exception", "timeout", "critical"}
+)
+_OK_STATUSES = frozenset({"ok", "success", "pass", "passed", "done", "completed"})
+
+
+@dataclass(frozen=True)
+class TrajectoryStep:
+    """Minimal step record for TRAJDEBUG without a full :class:`AgentTrace`."""
+
+    step: int
+    name: str
+    status: str = "ok"  # ok | error | fail | skip | …
+    message: str = ""
+    recovered: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "step": self.step,
+            "name": self.name,
+            "status": self.status,
+            "message": self.message,
+            "recovered": self.recovered,
+        }
+
+
+@dataclass(frozen=True)
+class ErrorLifecycle:
+    """Summary of intermediate failures along a trajectory (TRAJDEBUG)."""
+
+    step_count: int
+    error_steps: tuple[int, ...]
+    critical_step: int | None
+    claimed_success: bool
+    unrecovered_count: int
+    error_names: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "step_count": self.step_count,
+            "error_steps": list(self.error_steps),
+            "critical_step": self.critical_step,
+            "claimed_success": self.claimed_success,
+            "unrecovered_count": self.unrecovered_count,
+            "error_names": list(self.error_names),
+        }
+
+
+def node_is_failed(node: TraceNode) -> bool:
+    """True if a trace node represents an intermediate failure.
+
+    Checks ``metadata['status'|'ok'|'success'|'error']`` and content markers
+    (ERROR/Exception/failed). END nodes with empty failure metadata are not
+    automatically failures.
+    """
+    md = node.metadata or {}
+    status = str(md.get("status", "")).strip().lower()
+    if status in _FAIL_STATUSES:
+        return True
+    if status in _OK_STATUSES:
+        return False
+    if "ok" in md and md["ok"] is False:
+        return True
+    if "success" in md and md["success"] is False:
+        return True
+    err = md.get("error")
+    if err not in (None, "", False, 0):
+        return True
+    if node.node_type == NodeType.END:
+        # Only fail END if explicitly marked
+        return False
+    content = node.content or ""
+    if content.strip().lower().startswith("error"):
+        return True
+    if _ERROR_CONTENT_RE.search(content) and (
+        "traceback" in content.lower()
+        or "exception" in content.lower()
+        or md.get("failed") is True
+    ):
+        return True
+    return False
+
+
+def _steps_from_trace(trace: AgentTrace) -> list[TrajectoryStep]:
+    out: list[TrajectoryStep] = []
+    for node in trace.nodes:
+        failed = node_is_failed(node)
+        name = f"{node.node_type.value}:{node.content[:40]}"
+        out.append(
+            TrajectoryStep(
+                step=node.step,
+                name=name,
+                status="error" if failed else "ok",
+                message=(node.content or "")[:200],
+                recovered=False,
+            )
+        )
+    return out
+
+
+def _normalize_steps(
+    source: AgentTrace | Sequence[TrajectoryStep] | Sequence[dict[str, Any]],
+) -> list[TrajectoryStep]:
+    if isinstance(source, AgentTrace):
+        return _steps_from_trace(source)
+    steps: list[TrajectoryStep] = []
+    for i, item in enumerate(source):
+        if isinstance(item, TrajectoryStep):
+            steps.append(item)
+            continue
+        if isinstance(item, dict):
+            st = int(item.get("step", i + 1))
+            name = str(item.get("name") or item.get("action") or f"step_{st}")
+            status = str(item.get("status", "ok")).strip().lower()
+            msg = str(item.get("message") or item.get("error") or "")
+            recovered = bool(item.get("recovered", False))
+            if item.get("ok") is False or item.get("success") is False:
+                status = "error"
+            steps.append(
+                TrajectoryStep(
+                    step=st,
+                    name=name,
+                    status=status,
+                    message=msg,
+                    recovered=recovered,
+                )
+            )
+            continue
+        raise TypeError(f"unsupported trajectory step type: {type(item)!r}")
+    return steps
+
+
+def analyze_error_lifecycle(
+    source: AgentTrace | Sequence[TrajectoryStep] | Sequence[dict[str, Any]],
+    *,
+    claimed_success: bool | None = None,
+) -> ErrorLifecycle:
+    """Walk a trajectory and locate unrecovered intermediate failures.
+
+    * If ``claimed_success`` is None and source is :class:`AgentTrace`, success
+      is inferred from presence of an END node without failure metadata.
+    * A step is unrecovered when status is fail/error and ``recovered`` is False
+      (dict/TrajectoryStep) or, for traces, when no later OK TOOL_RETURN follows
+      a failed TOOL_CALL with the same tool name hint.
+    """
+    steps = _normalize_steps(source)
+    if not steps:
+        return ErrorLifecycle(
+            step_count=0,
+            error_steps=(),
+            critical_step=None,
+            claimed_success=False,
+            unrecovered_count=0,
+        )
+
+    if claimed_success is None:
+        if isinstance(source, AgentTrace):
+            ends = [n for n in source.nodes if n.node_type == NodeType.END]
+            claimed_success = bool(ends) and not any(node_is_failed(n) for n in ends)
+        else:
+            # last step ok and no explicit failure claim
+            last = steps[-1]
+            claimed_success = last.status in _OK_STATUSES
+
+    error_steps: list[int] = []
+    error_names: list[str] = []
+    unrecovered: list[int] = []
+    for s in steps:
+        if s.status in _FAIL_STATUSES or (
+            s.message and s.status not in _OK_STATUSES and s.status == "error"
+        ):
+            error_steps.append(s.step)
+            error_names.append(s.name)
+            if not s.recovered:
+                unrecovered.append(s.step)
+        elif s.status not in _OK_STATUSES and s.status not in {"skip", "skipped", "info"}:
+            # unknown non-ok → treat as error
+            if s.status:
+                error_steps.append(s.step)
+                error_names.append(s.name)
+                if not s.recovered:
+                    unrecovered.append(s.step)
+
+    critical = unrecovered[0] if unrecovered else (error_steps[0] if error_steps else None)
+    return ErrorLifecycle(
+        step_count=len(steps),
+        error_steps=tuple(error_steps),
+        critical_step=critical,
+        claimed_success=bool(claimed_success),
+        unrecovered_count=len(unrecovered),
+        error_names=tuple(error_names[:20]),
+    )
+
+
+def gate_error_lifecycle(
+    source: AgentTrace | Sequence[TrajectoryStep] | Sequence[dict[str, Any]],
+    *,
+    claimed_success: bool | None = None,
+    refuse_claimed_success_with_errors: bool = True,
+    max_unrecovered: int = 0,
+) -> GateOutcome:
+    """Refuse trajectories that hide critical intermediate failures (TRAJDEBUG).
+
+    Public case: arXiv 2608.06346 *TRAJDEBUG: Tracing Error Lifecycle to
+    Identify Critical Failures in Long-Horizon LLM Agents*. Scoring only the
+    final answer misses where the run first went wrong.
+
+    Rules:
+
+    * Empty trajectory → **FAIL_LOUD**
+    * ``unrecovered_count > max_unrecovered`` → **FAIL**
+    * Claimed success + any unrecovered error (default) → **FAIL**
+    * Clean path → **PASS**
+
+    Args:
+        source: :class:`AgentTrace` or sequence of step dicts / TrajectoryStep.
+        claimed_success: Override success claim (None = infer).
+        refuse_claimed_success_with_errors: Silent-success trap (default True).
+        max_unrecovered: Allowed unrecovered errors (default 0).
+    """
+    steps = _normalize_steps(source)
+    if len(steps) == 0:
+        return GateOutcome(
+            ok=False,
+            verdict="FAIL_LOUD",
+            reason=(
+                "TRAJDEBUG: empty trajectory — no steps to scan for error lifecycle "
+                "(write-only ornament / no intermediate evidence)"
+            ),
+            exit_code=2,
+            error_step_count=0,
+            critical_step=None,
+            human_required=True,
+        )
+
+    life = analyze_error_lifecycle(source, claimed_success=claimed_success)
+
+    if life.unrecovered_count > max_unrecovered:
+        return GateOutcome(
+            ok=False,
+            verdict="FAIL",
+            reason=(
+                f"TRAJDEBUG: {life.unrecovered_count} unrecovered error step(s) "
+                f"(max={max_unrecovered}) critical_step={life.critical_step} "
+                f"errors={list(life.error_names)[:5]} — refuse long-horizon continue "
+                f"(arXiv 2608.06346 error lifecycle)"
+            ),
+            exit_code=1,
+            error_step_count=len(life.error_steps),
+            critical_step=life.critical_step,
+            human_required=True,
+            run_id_a=getattr(source, "run_id", None) if isinstance(source, AgentTrace) else None,
+        )
+
+    if (
+        refuse_claimed_success_with_errors
+        and life.claimed_success
+        and life.error_steps
+        and life.unrecovered_count > 0
+    ):
+        return GateOutcome(
+            ok=False,
+            verdict="FAIL",
+            reason=(
+                f"TRAJDEBUG: claimed success with unrecovered intermediate errors "
+                f"at steps={list(life.error_steps)[:8]} critical={life.critical_step} "
+                f"— final-answer-only scoring hides lifecycle failures"
+            ),
+            exit_code=1,
+            error_step_count=len(life.error_steps),
+            critical_step=life.critical_step,
+            human_required=True,
+        )
+
+    return GateOutcome(
+        ok=True,
+        verdict="PASS",
+        reason=(
+            f"TRAJDEBUG ok: steps={life.step_count} errors={len(life.error_steps)} "
+            f"unrecovered={life.unrecovered_count} claimed_success={life.claimed_success}"
+        ),
+        exit_code=0,
+        error_step_count=len(life.error_steps),
+        critical_step=life.critical_step,
+        human_required=False,
+    )
+
+
+def assert_error_lifecycle_ok(
+    source: AgentTrace | Sequence[TrajectoryStep] | Sequence[dict[str, Any]],
+    **kwargs: Any,
+) -> GateOutcome:
+    """Raise :class:`ClosedLoopError` unless :func:`gate_error_lifecycle` is ok."""
+    outcome = gate_error_lifecycle(source, **kwargs)
     if not outcome.ok:
         raise ClosedLoopError(f"{outcome.verdict}: {outcome.reason}")
     return outcome

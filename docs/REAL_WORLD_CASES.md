@@ -58,6 +58,46 @@ propagate across intermediate reasoning / tool stages.
 **Product mapping:** agentdelta step-level `diff_traces` + `gate_traces` with
 path fingerprints (WRITER-NOT-READER) — behavioral CI, not answer equality.
 
+## Case TRAJDEBUG — error lifecycle on long-horizon traces
+
+**Source:** Track B research (`20260807T201237Z`):
+
+| Case | Link |
+|------|------|
+| TRAJDEBUG | arXiv [2608.06346](https://arxiv.org/abs/2608.06346v1) |
+| DiagChain (related) | intermediate evidence-grounded stages (prior) |
+| Bitter Lesson of Tool Calling | arXiv 2608.06370 — tool path failures |
+
+**What fails:**
+
+1. Long-horizon agents mark a run **successful** from the final END text.
+2. Intermediate TOOL_RETURN / LLM steps failed (timeout, exception, status=error).
+3. Final-answer-only CI never reports **where** the lifecycle first broke
+   (`critical_step`).
+
+**Product in this repo:**
+
+| Control | API |
+|---------|-----|
+| Node classifier | `node_is_failed(node)` |
+| Lifecycle scan | `analyze_error_lifecycle(trace\|steps)` → `ErrorLifecycle` |
+| Gate | `gate_error_lifecycle(...)` |
+| Step type | `TrajectoryStep` for lightweight CI fixtures |
+| Raise form | `assert_error_lifecycle_ok(...)` |
+
+**Rules (load-bearing):**
+
+- Empty trajectory → **FAIL_LOUD**
+- Unrecovered errors > budget → **FAIL** (`critical_step` set)
+- Claimed success + unrecovered intermediate errors → **FAIL**
+- Recovered errors (`recovered=True`) do not fail at max_unrecovered=0
+
+**Tests:** `tests/test_trajdebug.py`
+
+**Non-Ornament:** Call `gate_error_lifecycle` on every recorded trace before
+shipping a “green” run. Pair with `gate_traces` for path regression and
+WRITER-NOT-READER for answer-only collapse.
+
 ---
 
 ## Related queue IDs
