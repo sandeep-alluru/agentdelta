@@ -100,8 +100,54 @@ WRITER-NOT-READER for answer-only collapse.
 
 ---
 
+## Case BITTER-TOOL — tool-call path brittleness (arXiv 2608.06370)
+
+**Source:** Track B research (`20260808T081222Z`) —
+[The Bitter Lesson of Tool Calling](https://arxiv.org/abs/2608.06370)
+(programmatic vs JSON tool calling on BFCL v4; context-rot stability).
+
+**What fails (tool-path twin of TRAJDEBUG):**
+
+1. **Orphan TOOL_CALL** — no matching TOOL_RETURN; agent still ends “success”.
+2. **Silent tool error** — tool result status=error while END claims success.
+3. **Schema gap** — required JSON/stub arguments missing; call proceeds.
+4. **Parallel partial fail** — fan-out group mixes ok/error arms.
+5. **Context rot** — stale tool results reused far past the call step without
+   re-invocation (paper notes baseline degradation under context rot).
+
+**Product in this repo:**
+
+| Control | API |
+|---------|-----|
+| Events | `ToolCallEvent`, `ToolResultEvent` |
+| Analysis | `analyze_tool_calls` → `ToolCallAnalysis` |
+| Gate | `gate_tool_calls(...)` |
+| Trace extract | `extract_tool_events(trace)` |
+| Raise form | `assert_tool_calls_ok(...)` |
+
+**Rules (load-bearing):**
+
+- `require_tools` + zero calls → **FAIL_LOUD**
+- Orphan call_ids → **FAIL**
+- Failed tool results + claimed success → **FAIL**
+- Missing required schema args → **FAIL**
+- Parallel partial groups → **FAIL**
+- Stale reuse beyond `max_result_age_steps` → **FAIL**
+- `prefer_programmatic` with JSON-only styles → **WARN** (paper: PTC ≥ JSON)
+- Clean paired tool path → **PASS**
+
+**Tests:** `tests/test_bitter_tool.py`
+
+**Non-Ornament:** Call `gate_tool_calls` on tool-using traces before accepting
+CI green. Pair with `gate_error_lifecycle` (generic intermediate errors) and
+`gate_traces` (path regression).
+
+---
+
 ## Related queue IDs
 
 - **WRITER-NOT-READER** — this case (P0)
+- **TRAJDEBUG** — intermediate error lifecycle (sibling)
+- **BITTER-TOOL** — tool-call pairing/schema/parallel/stale (this section)
 - **SILENT-SUCCESS** — degraded exit-0 (notarize / groundcrew)
 - D-FOGHORN (foghorn) — oldest-as-current reader bug (sibling reader discipline)
