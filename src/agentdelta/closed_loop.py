@@ -7,7 +7,7 @@ Who reads the output?
 
 What outcome changes?
   Returns a structured ``GateOutcome`` with ``exit_code`` suitable for
-  ``sys.exit`` — empty/wrong output is never a silent PASS.
+  ``sys.exit`` - empty/wrong output is never a silent PASS.
   Intermediate tool/LLM failures with a clean END claim → FAIL (TRAJDEBUG).
 
 WRITER-NOT-READER (farm lesson):
@@ -15,9 +15,9 @@ WRITER-NOT-READER (farm lesson):
   while leaving *readers* on a collapsed key (final-answer-only, stale path,
   never reloading disk) are incomplete. This module exposes:
 
-  * :func:`path_fingerprint` / :func:`answer_fingerprint` — full path vs END-only
-  * :func:`gate_from_disk` — reader always reloads JSONL from disk
-  * :func:`e2e_reader_after_write` — write then gate via disk only
+  * :func:`path_fingerprint` / :func:`answer_fingerprint` - full path vs END-only
+  * :func:`gate_from_disk` - reader always reloads JSONL from disk
+  * :func:`e2e_reader_after_write` - write then gate via disk only
   * answer-only collapse refusal inside :func:`gate_traces`
 
 TRAJDEBUG (public arXiv 2608.06346):
@@ -30,9 +30,10 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import asdict, dataclass, field
+from collections.abc import Sequence
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from agentdelta.trace import AgentTrace, NodeType, TraceNode
 
@@ -68,7 +69,7 @@ class GateOutcome:
     verdict: str
     reason: str
     exit_code: int
-    score: Any = None  # RegressionScore | None — typed loosely to avoid eager import
+    score: Any = None  # RegressionScore | None - typed loosely to avoid eager import
     run_id_a: str | None = None
     run_id_b: str | None = None
     has_regression: bool = False
@@ -109,7 +110,7 @@ def path_fingerprint(trace: AgentTrace) -> str:
 
     This is the load-bearing identity for WRITER-NOT-READER. Readers that only
     compare :func:`answer_fingerprint` (END node) collapse intermediate tool
-    and reasoning changes into a false match — the farm "cache key" lesson.
+    and reasoning changes into a false match - the farm "cache key" lesson.
     """
     h = hashlib.sha256()
     for node in trace.nodes:
@@ -121,7 +122,7 @@ def path_fingerprint(trace: AgentTrace) -> str:
 
 
 def answer_fingerprint(trace: AgentTrace) -> str:
-    """END-node-only fingerprint — *insufficient* for behavioral gates.
+    """END-node-only fingerprint - *insufficient* for behavioral gates.
 
     Exposed so tests can prove the collapse trap: same answer, different path.
     Never use this alone to decide PASS.
@@ -202,7 +203,7 @@ def e2e_reader_after_write(
 ) -> GateOutcome:
     """Write both traces, then gate **only** via disk reload.
 
-    WRITER-NOT-READER e2e control: a content-correct writer is not enough —
+    WRITER-NOT-READER e2e control: a content-correct writer is not enough -
     the reader that CI uses must observe the bytes on disk. Returns the
     :class:`GateOutcome` of that reader path.
     """
@@ -231,7 +232,7 @@ def e2e_content_swap_rejudges(
     swap must change the *reader* outcome.
 
     Returns:
-        ``(before_outcome, after_outcome)`` — both from :func:`gate_from_disk`.
+        ``(before_outcome, after_outcome)`` - both from :func:`gate_from_disk`.
     """
     root = Path(work_dir)
     root.mkdir(parents=True, exist_ok=True)
@@ -276,14 +277,14 @@ def gate_traces(
         warn_is_ok: If False, ``WARN`` is treated as not-ok (exit 1).
 
     Returns:
-        :class:`GateOutcome` — callers should ``sys.exit(outcome.exit_code)``.
+        :class:`GateOutcome` - callers should ``sys.exit(outcome.exit_code)``.
     """
     try:
         trace_a = _load_trace(baseline)
         trace_b = _load_trace(candidate)
     except ClosedLoopError as exc:
         return _fail_loud(str(exc))
-    except Exception as exc:  # noqa: BLE001 — surface load errors as FAIL_LOUD
+    except Exception as exc:
         return _fail_loud(f"trace load failed: {exc.__class__.__name__}: {exc}")
 
     run_a, run_b = trace_a.run_id, trace_b.run_id
@@ -296,7 +297,7 @@ def gate_traces(
 
     if len(trace_a) == 0:
         return _fail_loud(
-            "empty baseline trace — nothing to gate against",
+            "empty baseline trace - nothing to gate against",
             run_a,
             run_b,
             path_a=path_a,
@@ -306,7 +307,7 @@ def gate_traces(
         )
     if len(trace_b) == 0:
         return _fail_loud(
-            "empty candidate trace — empty output is not a pass",
+            "empty candidate trace - empty output is not a pass",
             run_a,
             run_b,
             path_a=path_a,
@@ -318,7 +319,7 @@ def gate_traces(
     try:
         from agentdelta.diff import diff_traces
         from agentdelta.score import compute_score
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return _fail_loud(
             f"scoring stack unavailable: {exc.__class__.__name__}: {exc}",
             run_a,
@@ -336,7 +337,7 @@ def gate_traces(
             fork_threshold=fork_threshold,
             match_threshold=match_threshold,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return _fail_loud(
             f"diff failed: {exc.__class__.__name__}: {exc}",
             run_a,
@@ -391,10 +392,7 @@ def gate_traces(
         ok, exit_code = False, 1
         verdict = score.verdict
 
-    reason = (
-        f"verdict={verdict} overall={score.overall:.1f} "
-        f"has_regression={has_reg}"
-    )
+    reason = f"verdict={verdict} overall={score.overall:.1f} has_regression={has_reg}"
     if diff.fork_point is not None:
         reason += f" fork_at=a{diff.fork_point.step_a}/b{diff.fork_point.step_b}"
 
@@ -404,7 +402,7 @@ def gate_traces(
         verdict = "FAIL"
         reason = (
             "WRITER-NOT-READER: path fingerprint diverged while final answer matches "
-            f"— refusing answer-only PASS (path_a={path_a[:12]}… path_b={path_b[:12]}…)"
+            f"- refusing answer-only PASS (path_a={path_a[:12]}… path_b={path_b[:12]}…)"
         )
         has_reg = True
 
@@ -440,7 +438,7 @@ def assert_no_regression(
 
 
 # ---------------------------------------------------------------------------
-# TRAJDEBUG — error lifecycle on long-horizon trajectories
+# TRAJDEBUG - error lifecycle on long-horizon trajectories
 # ---------------------------------------------------------------------------
 
 _ERROR_CONTENT_RE = re.compile(
@@ -520,13 +518,14 @@ def node_is_failed(node: TraceNode) -> bool:
     content = node.content or ""
     if content.strip().lower().startswith("error"):
         return True
-    if _ERROR_CONTENT_RE.search(content) and (
-        "traceback" in content.lower()
-        or "exception" in content.lower()
-        or md.get("failed") is True
-    ):
-        return True
-    return False
+    return bool(
+        _ERROR_CONTENT_RE.search(content)
+        and (
+            "traceback" in content.lower()
+            or "exception" in content.lower()
+            or md.get("failed") is True
+        )
+    )
 
 
 def _steps_from_trace(trace: AgentTrace) -> list[TrajectoryStep]:
@@ -672,7 +671,7 @@ def gate_error_lifecycle(
             ok=False,
             verdict="FAIL_LOUD",
             reason=(
-                "TRAJDEBUG: empty trajectory — no steps to scan for error lifecycle "
+                "TRAJDEBUG: empty trajectory - no steps to scan for error lifecycle "
                 "(write-only ornament / no intermediate evidence)"
             ),
             exit_code=2,
@@ -690,7 +689,7 @@ def gate_error_lifecycle(
             reason=(
                 f"TRAJDEBUG: {life.unrecovered_count} unrecovered error step(s) "
                 f"(max={max_unrecovered}) critical_step={life.critical_step} "
-                f"errors={list(life.error_names)[:5]} — refuse long-horizon continue "
+                f"errors={list(life.error_names)[:5]} - refuse long-horizon continue "
                 f"(arXiv 2608.06346 error lifecycle)"
             ),
             exit_code=1,
@@ -712,7 +711,7 @@ def gate_error_lifecycle(
             reason=(
                 f"TRAJDEBUG: claimed success with unrecovered intermediate errors "
                 f"at steps={list(life.error_steps)[:8]} critical={life.critical_step} "
-                f"— final-answer-only scoring hides lifecycle failures"
+                f"- final-answer-only scoring hides lifecycle failures"
             ),
             exit_code=1,
             error_step_count=len(life.error_steps),

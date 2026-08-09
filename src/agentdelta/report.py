@@ -168,7 +168,7 @@ def to_markdown(result: DiffResult) -> str:
         lines += [
             "### ⚡ First fork point",
             "",
-            f"> **Step {fp.step_a}** — {fp.description}",
+            f"> **Step {fp.step_a}** - {fp.description}",
             "",
             "```diff",
             f"- {fp.node_a.content[:200]}",

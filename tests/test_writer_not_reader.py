@@ -1,4 +1,4 @@
-"""WRITER-NOT-READER — reader e2e that fails if only the writer path is fixed.
+"""WRITER-NOT-READER - reader e2e that fails if only the writer path is fixed.
 
 Farm lesson (Qdrant): cache fixes often update the writer key and never trace
 readers. A content swap must re-judge via the disk reader, not in-memory only.
@@ -10,8 +10,6 @@ final-answer-only evaluation hides path divergence.
 from __future__ import annotations
 
 from pathlib import Path
-
-import pytest
 
 from agentdelta.closed_loop import (
     answer_fingerprint,
@@ -74,7 +72,7 @@ def test_gate_marks_regression_when_path_diverges_same_answer() -> None:
 
 
 def test_e2e_reader_after_write_observes_disk(tmp_path: Path) -> None:
-    """Writer alone is insufficient — gate must go through disk reload."""
+    """Writer alone is insufficient - gate must go through disk reload."""
     a = _make_trace("baseline", "get_weather(location='London')")
     b = _make_trace("candidate", "get_weather(location='London')")
     out = e2e_reader_after_write(a, b, tmp_path)
@@ -119,7 +117,7 @@ def test_content_swap_rejudges_via_reader(tmp_path: Path) -> None:
     assert after.ok is False
     assert after.has_regression is True
     assert after.path_fingerprint_a != after.path_fingerprint_b
-    # Same final answer — the collapse trap that unit-level answer checks miss.
+    # Same final answer - the collapse trap that unit-level answer checks miss.
     assert after.answer_fingerprint_a == after.answer_fingerprint_b
 
 

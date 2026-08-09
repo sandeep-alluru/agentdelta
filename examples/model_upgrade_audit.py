@@ -25,7 +25,6 @@ from agentdelta.instrument import AgentdeltaCallback
 from agentdelta.report import print_diff
 from agentdelta.trace import AgentTrace
 
-
 # ---------------------------------------------------------------------------
 # Fake LLM response shim
 # ---------------------------------------------------------------------------

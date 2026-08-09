@@ -1,4 +1,4 @@
-"""Tool-call brittleness gate — BITTER-TOOL (arXiv 2608.06370).
+"""Tool-call brittleness gate - BITTER-TOOL (arXiv 2608.06370).
 
 Public case: *The Bitter Lesson of Tool Calling* (Track B research). Tool use
 turns LLMs into agents; failures concentrate on **invocation shape** (JSON vs
@@ -6,7 +6,7 @@ programmatic), **orphan calls** (no result), **silent tool errors** under a
 clean END claim, and **context-rot** reuse of stale tool results.
 
 Twin of TRAJDEBUG (generic intermediate errors): this module is **tool-path
-specific** — schema completeness, call↔return pairing, parallel partial fail,
+specific** - schema completeness, call↔return pairing, parallel partial fail,
 and stale result reuse.
 
 Non-Ornament:
@@ -17,17 +17,16 @@ Non-Ornament:
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Literal, Sequence
+from typing import Any, Literal
 
 from agentdelta.closed_loop import ClosedLoopError, GateOutcome
 from agentdelta.trace import AgentTrace, NodeType, TraceNode
 
 CallStyle = Literal["json", "programmatic", "unknown"]
 
-_FAIL_STATUSES = frozenset(
-    {"error", "fail", "failed", "timeout", "exception", "denied", "invalid"}
-)
+_FAIL_STATUSES = frozenset({"error", "fail", "failed", "timeout", "exception", "denied", "invalid"})
 _OK_STATUSES = frozenset({"ok", "success", "pass", "passed", "done", "completed", ""})
 
 
@@ -127,24 +126,18 @@ def _node_meta(node: TraceNode) -> dict[str, Any]:
     return dict(meta) if isinstance(meta, dict) else {}
 
 
-def _events_from_trace(trace: AgentTrace) -> tuple[list[ToolCallEvent], list[ToolResultEvent], bool]:
+def _events_from_trace(
+    trace: AgentTrace,
+) -> tuple[list[ToolCallEvent], list[ToolResultEvent], bool]:
     calls: list[ToolCallEvent] = []
     results: list[ToolResultEvent] = []
-    step_i = 0
-    for node in trace.nodes:
-        step_i += 1
+    for step_i, node in enumerate(trace.nodes, start=1):
         meta = _node_meta(node)
         name = str(
-            meta.get("tool")
-            or meta.get("name")
-            or getattr(node, "content", "")
-            or f"tool_{step_i}"
+            meta.get("tool") or meta.get("name") or getattr(node, "content", "") or f"tool_{step_i}"
         )[:120]
         call_id = str(
-            meta.get("call_id")
-            or meta.get("tool_call_id")
-            or meta.get("id")
-            or f"{name}@{step_i}"
+            meta.get("call_id") or meta.get("tool_call_id") or meta.get("id") or f"{name}@{step_i}"
         )
         if node.node_type == NodeType.TOOL_CALL:
             args = meta.get("arguments") or meta.get("args") or {}
@@ -173,10 +166,12 @@ def _events_from_trace(trace: AgentTrace) -> tuple[list[ToolCallEvent], list[Too
                 status = "error"
             # content heuristics for errors
             low = content.lower()
-            if any(tok in low for tok in ("traceback", "exception:", "error:", "timeout")):
-                if status in _OK_STATUSES:
-                    status = "error"
-                    err = err or content[:200]
+            if (
+                any(tok in low for tok in ("traceback", "exception:", "error:", "timeout"))
+                and status in _OK_STATUSES
+            ):
+                status = "error"
+                err = err or content[:200]
             results.append(
                 ToolResultEvent(
                     call_id=call_id,
@@ -210,7 +205,7 @@ def _events_from_sequences(
                 continue
             if not isinstance(c, dict):
                 raise TypeError(f"tool call must be ToolCallEvent or dict, got {type(c)!r}")
-            cid = str(c.get("call_id") or c.get("id") or f"call_{i+1}")
+            cid = str(c.get("call_id") or c.get("id") or f"call_{i + 1}")
             name = str(c.get("name") or c.get("tool") or "tool")
             step = int(c.get("step", i + 1))
             args = c.get("arguments") or c.get("args") or {}
@@ -242,7 +237,7 @@ def _events_from_sequences(
                 continue
             if not isinstance(r, dict):
                 raise TypeError(f"tool result must be ToolResultEvent or dict, got {type(r)!r}")
-            cid = str(r.get("call_id") or r.get("id") or f"result_{i+1}")
+            cid = str(r.get("call_id") or r.get("id") or f"result_{i + 1}")
             name = str(r.get("name") or r.get("tool") or "tool")
             step = int(r.get("step", i + 1))
             status = str(r.get("status") or "ok").strip().lower()
@@ -270,15 +265,11 @@ def _schema_invalid(
     if not required:
         return False
     args = call.arguments or {}
-    for key in required:
-        if key not in args or args[key] is None or args[key] == "":
-            return True
-    return False
+    return any(key not in args or args[key] is None or args[key] == "" for key in required)
 
 
 def analyze_tool_calls(
-    source: AgentTrace
-    | None = None,
+    source: AgentTrace | None = None,
     *,
     calls: Sequence[ToolCallEvent | dict[str, Any]] | None = None,
     results: Sequence[ToolResultEvent | dict[str, Any]] | None = None,
@@ -341,10 +332,8 @@ def analyze_tool_calls(
     partial: list[str] = []
     for g, rs in groups.items():
         statuses = {_status_failed(r.status) or bool(r.error) for r in rs}
-        if True in statuses and False in statuses:
-            partial.append(g)
-        elif True in statuses and len(rs) < sum(
-            1 for c in c_list if c.parallel_group == g
+        if (True in statuses and False in statuses) or (
+            True in statuses and len(rs) < sum(1 for c in c_list if c.parallel_group == g)
         ):
             partial.append(g)
 
@@ -353,15 +342,12 @@ def analyze_tool_calls(
     if max_result_age_steps is not None and max_result_age_steps >= 0:
         horizon = total_steps
         if horizon is None:
-            horizon = max(
-                [c.step for c in c_list] + [r.step for r in r_list] + [0]
-            )
+            horizon = max([c.step for c in c_list] + [r.step for r in r_list] + [0])
         for r in r_list:
             age = int(horizon) - int(r.step)
-            if age > max_result_age_steps and not _status_failed(r.status):
+            if age > max_result_age_steps and not _status_failed(r.status) and claimed_success:
                 # only flag if a later END/success claim exists (claimed_success)
-                if claimed_success:
-                    stale.append(r.call_id)
+                stale.append(r.call_id)
 
     styles = tuple(sorted({c.style for c in c_list}))
 
@@ -415,7 +401,7 @@ def gate_tool_calls(
                 ok=False,
                 verdict="FAIL_LOUD",
                 reason=(
-                    "BITTER-TOOL: no tool calls or results — require_tools=True "
+                    "BITTER-TOOL: no tool calls or results - require_tools=True "
                     "(write-only ornament / no tool path evidence; arXiv 2608.06370)"
                 ),
                 exit_code=2,
@@ -455,7 +441,7 @@ def gate_tool_calls(
             ok=False,
             verdict="FAIL_LOUD",
             reason=(
-                "BITTER-TOOL: require_tools but call_count=0 — agent claimed a "
+                "BITTER-TOOL: require_tools but call_count=0 - agent claimed a "
                 "tool-using task without any TOOL_CALL evidence"
             ),
             exit_code=2,
@@ -470,7 +456,7 @@ def gate_tool_calls(
             verdict="FAIL",
             reason=(
                 f"BITTER-TOOL: {len(analysis.orphan_call_ids)} orphan tool call(s) "
-                f"without TOOL_RETURN ids={list(analysis.orphan_call_ids)[:8]} — "
+                f"without TOOL_RETURN ids={list(analysis.orphan_call_ids)[:8]} - "
                 "refuse incomplete tool path (arXiv 2608.06370)"
             ),
             exit_code=1,
@@ -480,17 +466,13 @@ def gate_tool_calls(
             run_id_a=run_id,
         )
 
-    if (
-        refuse_failed_with_success
-        and analysis.claimed_success
-        and analysis.failed_result_ids
-    ):
+    if refuse_failed_with_success and analysis.claimed_success and analysis.failed_result_ids:
         return GateOutcome(
             ok=False,
             verdict="FAIL",
             reason=(
                 f"BITTER-TOOL: claimed success with {len(analysis.failed_result_ids)} "
-                f"failed tool result(s) ids={list(analysis.failed_result_ids)[:8]} — "
+                f"failed tool result(s) ids={list(analysis.failed_result_ids)[:8]} - "
                 "silent tool error under clean END (bitter tool-calling lesson)"
             ),
             exit_code=1,
@@ -505,7 +487,7 @@ def gate_tool_calls(
             verdict="FAIL",
             reason=(
                 f"BITTER-TOOL: {len(analysis.schema_invalid_ids)} tool call(s) missing "
-                f"required schema args ids={list(analysis.schema_invalid_ids)[:8]} — "
+                f"required schema args ids={list(analysis.schema_invalid_ids)[:8]} - "
                 "JSON/tool stub contract broken"
             ),
             exit_code=1,
@@ -520,7 +502,7 @@ def gate_tool_calls(
             verdict="FAIL",
             reason=(
                 f"BITTER-TOOL: parallel fan-out partial failure groups="
-                f"{list(analysis.parallel_partial_groups)[:8]} — some arms failed "
+                f"{list(analysis.parallel_partial_groups)[:8]} - some arms failed "
                 "while others succeeded; refuse incomplete fan-out merge"
             ),
             exit_code=1,
@@ -536,7 +518,7 @@ def gate_tool_calls(
             reason=(
                 f"BITTER-TOOL: context-rot stale tool result reuse "
                 f"ids={list(analysis.stale_reuse_ids)[:8]} "
-                f"max_age_steps={max_result_age_steps} — re-invoke tool before "
+                f"max_age_steps={max_result_age_steps} - re-invoke tool before "
                 "treating result as current"
             ),
             exit_code=1,
@@ -545,11 +527,11 @@ def gate_tool_calls(
             run_id_a=run_id,
         )
 
-    # Soft note when prefer_programmatic and only json — WARN still ok=True
+    # Soft note when prefer_programmatic and only json - WARN still ok=True
     style_note = ""
     if prefer_programmatic and analysis.styles and "programmatic" not in analysis.styles:
         style_note = (
-            f" (prefer_programmatic: styles={list(analysis.styles)} — "
+            f" (prefer_programmatic: styles={list(analysis.styles)} - "
             "paper finds PTC matches/exceeds JSON on BFCL v4; not hard-fail)"
         )
         return GateOutcome(

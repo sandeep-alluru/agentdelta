@@ -13,9 +13,9 @@ Add to Claude Desktop (~/.config/claude/claude_desktop_config.json):
     }
 
 Tools exposed:
-    diff_traces     — compare two JSONL trace files, returns DiffResult as JSON
-    inspect_trace   — summarise a single JSONL trace file
-    record_snippet  — return copy-paste Python code to record a framework agent run
+    diff_traces     - compare two JSONL trace files, returns DiffResult as JSON
+    inspect_trace   - summarise a single JSONL trace file
+    record_snippet  - return copy-paste Python code to record a framework agent run
 """
 
 from __future__ import annotations

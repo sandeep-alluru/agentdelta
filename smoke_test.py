@@ -13,13 +13,10 @@ Exit 0 = all passed. Exit 1 = at least one failure.
 
 from __future__ import annotations
 
-import importlib
 import json
 import subprocess
 import sys
 import tempfile
-import textwrap
-import time
 import traceback
 from pathlib import Path
 
@@ -54,7 +51,7 @@ def section(title: str) -> None:
     print(f"\n{BOLD}{title}{RESET}")
 
 
-def run(name: str, fn):  # noqa: ANN001
+def run(name: str, fn):
     try:
         fn()
         ok(name)
@@ -73,21 +70,21 @@ def _test_import_version():
     assert agentdelta.__version__ != "0.0.0"
 
 def _test_import_public_api():
-    from agentdelta import AgentTrace, diff_traces, record
+    from agentdelta import diff_traces, record
     assert callable(diff_traces)
     assert callable(record)
 
 def _test_import_trace_types():
-    from agentdelta.trace import NodeType, EdgeType, TraceNode, TraceEdge, AgentTrace
+    from agentdelta.trace import NodeType
     assert NodeType.LLM.value == "llm"
     assert EdgeType.TOOL_CALL.value == "tool_call"
 
 def _test_import_diff():
-    from agentdelta.diff import ForkPoint, DiffResult, StepDiff
+    from agentdelta.diff import DiffResult
     assert hasattr(DiffResult, "has_regression")
 
 def _test_import_instrument():
-    from agentdelta.instrument import AgentdeltaCallback, record
+    from agentdelta.instrument import AgentdeltaCallback
     cb = AgentdeltaCallback(run_id="smoke-import")
     assert cb.run_id == "smoke-import"
 
@@ -101,7 +98,8 @@ run("Instrumentation (AgentdeltaCallback, record)", _test_import_instrument)
 
 section("2. Trace creation and JSONL round-trip")
 
-from agentdelta.trace import AgentTrace, NodeType, EdgeType, TraceNode, TraceEdge
+from agentdelta.trace import AgentTrace, NodeType, TraceNode
+
 
 def _build_weather_trace(run_id: str, tool: str) -> AgentTrace:
     from agentdelta.instrument import AgentdeltaCallback
@@ -236,9 +234,11 @@ def _test_to_markdown():
     assert "|" in md  # has a table
 
 def _test_print_diff_runs():
-    from agentdelta.report import print_diff
     import io
+
     from rich.console import Console
+
+    from agentdelta.report import print_diff
     buf = io.StringIO()
     console = Console(file=buf, highlight=False)
     print_diff(_diff_result, console=console)
@@ -347,6 +347,7 @@ def _test_api_import():
 def _test_api_health():
     try:
         from fastapi.testclient import TestClient
+
         from agentdelta.api import app
     except ImportError:
         raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
@@ -359,6 +360,7 @@ def _test_api_health():
 def _test_api_diff_endpoint():
     try:
         from fastapi.testclient import TestClient
+
         from agentdelta.api import app
     except ImportError:
         raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
@@ -383,6 +385,7 @@ def _test_api_diff_endpoint():
 def _test_api_inspect_endpoint():
     try:
         from fastapi.testclient import TestClient
+
         from agentdelta.api import app
     except ImportError:
         raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")

@@ -110,7 +110,7 @@ def test_to_markdown_truncates_long_changed_list():
     # Build two traces with 25 different LLM steps to force 25 changed rows
     steps_a = [(NodeType.LLM, f"baseline reasoning step {i}") for i in range(25)]
     steps_b = [
-        (NodeType.LLM, f"candidate reasoning step {i} — completely different path")
+        (NodeType.LLM, f"candidate reasoning step {i} - completely different path")
         for i in range(25)
     ]
     a = _make_trace("a", steps_a)

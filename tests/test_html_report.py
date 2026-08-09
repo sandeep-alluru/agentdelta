@@ -20,7 +20,7 @@ def _make_trace(run_id: str, steps: list[tuple[NodeType, str]]) -> AgentTrace:
 
 @pytest.fixture
 def matched_diff() -> DiffResult:
-    """DiffResult with two matched traces — no regression.
+    """DiffResult with two matched traces - no regression.
 
     Content is identical across the two runs so the fork/no-fork verdict is
     deterministic. Using near-but-not-equal content (e.g. "4" vs "four") makes
@@ -77,7 +77,7 @@ def test_to_html_matched_no_regression(matched_diff: DiffResult) -> None:
 def test_to_html_matched_returns_pass_verdict(matched_diff: DiffResult) -> None:
     """Matched traces should render 'NO REGRESSION' verdict."""
     html = to_html(matched_diff)
-    # The diff is nearly identical — should NOT say REGRESSION DETECTED
+    # The diff is nearly identical - should NOT say REGRESSION DETECTED
     assert "NO REGRESSION" in html
 
 

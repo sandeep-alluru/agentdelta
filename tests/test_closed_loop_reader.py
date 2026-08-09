@@ -1,4 +1,4 @@
-"""Closed-loop reader/gate — empty/wrong output must fail loudly (L1)."""
+"""Closed-loop reader/gate - empty/wrong output must fail loudly (L1)."""
 
 from __future__ import annotations
 

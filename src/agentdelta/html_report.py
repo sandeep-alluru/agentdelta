@@ -118,7 +118,7 @@ def to_html(diff_result: DiffResult, title: str = "agentdelta diff") -> str:
         title: Browser tab title for the report page.
 
     Returns:
-        A complete HTML string with embedded CSS — no external dependencies.
+        A complete HTML string with embedded CSS - no external dependencies.
     """
     s = diff_result.summary
     has_regression = s.get("has_regression", False)
@@ -177,8 +177,8 @@ def to_html(diff_result: DiffResult, title: str = "agentdelta diff") -> str:
         is_fork = fork_step_a is not None and node.step == fork_step_a
         row_class = f"fork-here {step.status}" if is_fork else step.status
 
-        step_a_cell = str(step.step_a.step) if step.step_a else "—"
-        step_b_cell = str(step.step_b.step) if step.step_b else "—"
+        step_a_cell = str(step.step_a.step) if step.step_a else "-"
+        step_b_cell = str(step.step_b.step) if step.step_b else "-"
 
         badge_class = f"badge badge-{step.status}"
         type_icon = {
@@ -189,8 +189,8 @@ def to_html(diff_result: DiffResult, title: str = "agentdelta diff") -> str:
             "end": "■",
         }.get(node.node_type.value, "?")
 
-        content_a = _esc(step.step_a.content, 100) if step.step_a else "—"
-        content_b = _esc(step.step_b.content, 100) if step.step_b else "—"
+        content_a = _esc(step.step_a.content, 100) if step.step_a else "-"
+        content_b = _esc(step.step_b.content, 100) if step.step_b else "-"
         detail = ""
         if step.status == "match":
             detail = content_a

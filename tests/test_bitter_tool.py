@@ -1,4 +1,4 @@
-"""BITTER-TOOL — tool-call brittleness (arXiv 2608.06370).
+"""BITTER-TOOL - tool-call brittleness (arXiv 2608.06370).
 
 Track B public research maps *The Bitter Lesson of Tool Calling* → agentdelta.
 Failure class: orphan tool calls, silent tool errors under clean END, schema
@@ -226,6 +226,7 @@ def test_from_agent_trace_paired_ok() -> None:
     assert analysis.result_count == 1
     assert analysis.orphan_call_ids == ()
 
+
 def test_dict_events() -> None:
     out = gate_tool_calls(
         calls=[{"call_id": "1", "name": "x", "step": 1, "args": {"a": 1}}],
@@ -278,16 +279,14 @@ def test_arxiv_bitter_tool_fixture() -> None:
     assert refuse.verdict == "FAIL"
     assert "BITTER-TOOL" in refuse.reason
 
-    # Post-fix class: recovered path — no success claim with failed tools,
+    # Post-fix class: recovered path - no success claim with failed tools,
     # or all tools ok under PTC style
     fixed_results = [
         {"call_id": "j1", "name": "code_exec", "step": 3, "status": "ok"},
         {"call_id": "j2", "name": "code_exec", "step": 5, "status": "ok", "content": "recovered"},
     ]
     # Use programmatic style (paper: PTC robust)
-    ptc_calls = [
-        {**c, "style": "programmatic"} for c in calls
-    ]
+    ptc_calls = [{**c, "style": "programmatic"} for c in calls]
     accept = gate_tool_calls(
         calls=ptc_calls,
         results=fixed_results,

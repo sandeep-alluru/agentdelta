@@ -1,4 +1,4 @@
-"""Tests for agentdelta.score — RegressionScore and compute_score."""
+"""Tests for agentdelta.score - RegressionScore and compute_score."""
 
 from __future__ import annotations
 
@@ -111,7 +111,7 @@ def test_custom_thresholds_change_verdict(forked_traces: tuple[AgentTrace, Agent
     normal = compute_score(diff, pass_threshold=80.0, warn_threshold=60.0)
     assert normal.threshold_pass == 80.0
     assert normal.threshold_warn == 60.0
-    # Very strict threshold — anything below 100 must WARN or FAIL
+    # Very strict threshold - anything below 100 must WARN or FAIL
     strict = compute_score(diff, pass_threshold=100.1, warn_threshold=99.9)
     assert strict.verdict in ("WARN", "FAIL")
     assert strict.threshold_pass == 100.1
@@ -227,7 +227,7 @@ def test_fork_penalty_single_baseline_node() -> None:
         score = compute_score(diff)
         assert score.fork_penalty == 0.0
     else:
-        # No fork detected by embeddings — still valid, just check shape
+        # No fork detected by embeddings - still valid, just check shape
         score = compute_score(diff)
         assert isinstance(score, RegressionScore)
 
@@ -283,7 +283,7 @@ def test_fork_penalty_zero_when_single_baseline_node_with_fork() -> None:
         similarity=0.3,
         description="reasoning diverged",
     )
-    # One step in baseline (step_a is not None), one in candidate — single baseline node
+    # One step in baseline (step_a is not None), one in candidate - single baseline node
     step = StepDiff(
         step_a=node_a, step_b=node_b, similarity=0.3, status="changed", summary="diverged"
     )

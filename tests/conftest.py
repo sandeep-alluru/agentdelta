@@ -33,7 +33,7 @@ def simple_trace_a() -> AgentTrace:
 
 @pytest.fixture
 def simple_trace_b_match(simple_trace_a) -> AgentTrace:
-    """Nearly identical trace — should produce no regression."""
+    """Nearly identical trace - should produce no regression."""
     return _make_trace(
         "run_b",
         [
@@ -49,7 +49,7 @@ def simple_trace_b_match(simple_trace_a) -> AgentTrace:
 
 @pytest.fixture
 def simple_trace_b_fork() -> AgentTrace:
-    """Trace that forks at step 3 — uses a different tool."""
+    """Trace that forks at step 3 - uses a different tool."""
     return _make_trace(
         "run_b_fork",
         [

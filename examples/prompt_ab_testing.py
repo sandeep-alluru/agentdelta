@@ -25,7 +25,6 @@ from agentdelta.diff import diff_traces
 from agentdelta.instrument import AgentdeltaCallback
 from agentdelta.trace import AgentTrace
 
-
 # ---------------------------------------------------------------------------
 # Fake LLM response shim
 # ---------------------------------------------------------------------------
@@ -72,7 +71,7 @@ def build_variant_a(query: dict) -> AgentTrace:
     cb.on_chain_start({}, {"input": query["topic"]})
 
     cb.on_llm_end(_LLMResponse(
-        f"I'll search for information about this topic."
+        "I'll search for information about this topic."
     ))
 
     cb.on_tool_start({"name": "web_search"}, f"query='{query['topic']}'")
@@ -145,7 +144,7 @@ def build_variant_c(query: dict) -> AgentTrace:
     cb.on_chain_start({}, {"input": query["topic"]})
 
     cb.on_llm_end(_LLMResponse(
-        f"I'll use multiple tools to maximize accuracy on this topic."
+        "I'll use multiple tools to maximize accuracy on this topic."
     ))
 
     # Tool 1: web_search (same as A and B)

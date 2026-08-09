@@ -26,12 +26,12 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
+from foghorn.repo import WorldRepo
+
 from agentdelta.diff import diff_traces
 from agentdelta.instrument import AgentdeltaCallback
 from agentdelta.report import print_diff
-from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
-from foghorn.repo import WorldRepo
-
+from agentdelta.trace import AgentTrace
 
 # ---------------------------------------------------------------------------
 # Helper: fake LLM response object matching what AgentdeltaCallback expects

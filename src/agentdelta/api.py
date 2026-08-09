@@ -4,9 +4,9 @@ Start with: uvicorn agentdelta.api:app --reload
 Install:    pip install "agentdelta[api]"
 
 Implements the openapi.yaml contract:
-    POST /diff      — compare two JSONL traces
-    POST /inspect   — summarise a single trace
-    GET  /health    — liveness probe
+    POST /diff      - compare two JSONL traces
+    POST /inspect   - summarise a single trace
+    GET  /health    - liveness probe
 """
 
 from __future__ import annotations

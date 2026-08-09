@@ -13,7 +13,7 @@ from pathlib import Path
 from agentdelta.diff import diff_traces
 from agentdelta.instrument import AgentdeltaCallback
 from agentdelta.report import print_diff, to_markdown
-from agentdelta.trace import AgentTrace, EdgeType, NodeType, TraceEdge, TraceNode
+from agentdelta.trace import AgentTrace
 
 
 def _build_trace(run_id: str, use_weather_tool: bool) -> AgentTrace:

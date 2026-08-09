@@ -39,7 +39,7 @@ def test_embed_trace_idempotent(simple_trace_a):
 def test_find_best_match_returns_none_below_threshold(simple_trace_a):
     embed_trace(simple_trace_a)
     node = simple_trace_a.nodes[0]
-    # threshold=1.1 is impossible — nothing matches
+    # threshold=1.1 is impossible - nothing matches
     match, _score = find_best_match(node, simple_trace_a.nodes[1:], threshold=1.1)
     assert match is None
 

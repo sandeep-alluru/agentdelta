@@ -35,7 +35,7 @@ class AgentdeltaCallback:
     # ── LangChain callback interface ──────────────────────────────────────────
 
     def on_llm_start(self, serialized: dict[str, Any], prompts: list[str], **kwargs: Any) -> None:
-        """No-op — input prompts are not captured; only LLM output is recorded."""
+        """No-op - input prompts are not captured; only LLM output is recorded."""
 
     def on_llm_end(self, response: Any, **kwargs: Any) -> None:
         """Record an LLM generation as a ``NodeType.LLM`` trace node."""
@@ -93,10 +93,10 @@ class AgentdeltaCallback:
             self.trace.add_edge(TraceEdge(step - 1, step, EdgeType.SEQUENCE, "chain_end"))
 
     def on_agent_action(self, action: Any, **kwargs: Any) -> None:
-        """No-op — agent actions are captured via ``on_tool_start``."""
+        """No-op - agent actions are captured via ``on_tool_start``."""
 
     def on_agent_finish(self, finish: Any, **kwargs: Any) -> None:
-        """No-op — agent finish is captured via ``on_chain_end``."""
+        """No-op - agent finish is captured via ``on_chain_end``."""
 
     # LangGraph compatibility shims (it checks for these via hasattr)
     def on_llm_error(self, error: Exception, **kwargs: Any) -> None:

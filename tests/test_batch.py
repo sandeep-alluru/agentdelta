@@ -1,4 +1,4 @@
-"""Tests for agentdelta.batch — BatchDiffResult, batch_diff, batch_from_directory."""
+"""Tests for agentdelta.batch - BatchDiffResult, batch_diff, batch_from_directory."""
 
 from __future__ import annotations
 
@@ -131,7 +131,7 @@ def test_batch_from_directory_matches_files(tmp_path: Path) -> None:
     a.save(baseline / "run1.jsonl")
     b.save(candidate / "run1.jsonl")
 
-    # Extra file only in baseline — should be ignored
+    # Extra file only in baseline - should be ignored
     extra = _make_trace("extra", [(NodeType.START, "extra")])
     extra.save(baseline / "extra.jsonl")
 

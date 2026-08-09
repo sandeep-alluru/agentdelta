@@ -1,4 +1,4 @@
-"""TRAJDEBUG — error lifecycle on long-horizon trajectories.
+"""TRAJDEBUG - error lifecycle on long-horizon trajectories.
 
 Public case (Track B 20260807T201237Z):
   arXiv 2608.06346 TRAJDEBUG: Tracing Error Lifecycle to Identify Critical

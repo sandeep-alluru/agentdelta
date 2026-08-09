@@ -1,4 +1,4 @@
-"""Tests for agentdelta.mcp_server — import guard and helper functions."""
+"""Tests for agentdelta.mcp_server - import guard and helper functions."""
 
 from __future__ import annotations
 

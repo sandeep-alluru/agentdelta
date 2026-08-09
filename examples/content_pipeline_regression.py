@@ -130,7 +130,7 @@ def build_baseline_trace(post: dict) -> AgentTrace:
         f"post_type='{post['type']}', criteria=['technical_insight', 'founder_credibility']",
     )
     cb.on_tool_end(
-        f"Evaluation complete. technical_insight=8.6, founder_credibility=7.8. "
+        "Evaluation complete. technical_insight=8.6, founder_credibility=7.8. "
         "Overall: PASS. Post queued for publish."
     )
 
@@ -200,7 +200,7 @@ def build_candidate_trace(post: dict) -> AgentTrace:
             f"post_type='{post['type']}', criteria=['technical_insight', 'founder_credibility']",
         )
         cb.on_tool_end(
-            f"Evaluation complete. technical_insight=5.8, founder_credibility=7.2. "
+            "Evaluation complete. technical_insight=5.8, founder_credibility=7.2. "
             "Overall: FAIL. technical_insight below threshold 7.0. Post not published."
         )
 

@@ -1,4 +1,4 @@
-"""Regression scoring — produce a single 0-100 behavioral similarity score for CI gates."""
+"""Regression scoring - produce a single 0-100 behavioral similarity score for CI gates."""
 
 from __future__ import annotations
 

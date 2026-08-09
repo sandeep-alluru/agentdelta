@@ -1,4 +1,4 @@
-"""agentdelta — semantic diff engine for AI agent behavior."""
+"""agentdelta - semantic diff engine for AI agent behavior."""
 
 from agentdelta.batch import BatchDiffResult, batch_diff, batch_from_directory
 from agentdelta.closed_loop import (

@@ -36,7 +36,7 @@ class TraceNode:
     Attributes:
         step: 1-based sequential position in the trace.
         node_type: Category of this step (LLM reasoning, tool call, etc.).
-        content: Human-readable text — reasoning output, ``tool(args)``, or tool return value.
+        content: Human-readable text - reasoning output, ``tool(args)``, or tool return value.
         metadata: Arbitrary key/value pairs for framework-specific data.
         embedding: Floating-point sentence embedding, populated by ``embed_trace()``.
     """
@@ -49,7 +49,7 @@ class TraceNode:
 
     @property
     def id(self) -> str:
-        """Content-addressed ID — same content always produces the same ID."""
+        """Content-addressed ID - same content always produces the same ID."""
         payload = f"{self.node_type}:{self.content}"
         return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
