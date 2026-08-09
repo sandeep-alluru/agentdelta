@@ -2,7 +2,7 @@
 
 Thank you for considering a contribution to agentdelta!
 
-For the full contribution guide — setup, workflow, PR conventions, review timeline — see [CONTRIBUTING.md](../CONTRIBUTING.md) in the repo root.
+For the full contribution guide — setup, workflow, PR conventions, review timeline — see [CONTRIBUTING.md](https://github.com/sandeep-alluru/agentdelta/blob/main/CONTRIBUTING.md) in the repo root.
 
 ## Quick links
 
