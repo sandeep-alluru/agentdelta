@@ -56,11 +56,10 @@ dev = [
     "httpx>=0.27",
 ]
 docs = [
-    "mkdocs>=1.6",
-    "mkdocs-material>=9.0",
+    "mkdocs>=1.5,<2",
+    "mkdocs-material>=9.0,<10",
     "mkdocstrings[python]>=0.25",
 ]
-
 [project.scripts]
 agentdelta = "agentdelta.cli:main"
 agentdelta-mcp = "agentdelta.mcp_server:run_server"
