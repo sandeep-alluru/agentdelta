@@ -144,10 +144,50 @@ CI green. Pair with `gate_error_lifecycle` (generic intermediate errors) and
 
 ---
 
+## Case SKILLPROX — self-evolving skills without closed-loop feedback (arXiv 2608.07449)
+
+**Source:** Track B research (`20260810T121232Z`) —
+[SkillProx: Self-Evolving Agent Skills via Proximal Textual Gradient
+Descent](https://arxiv.org/abs/2608.07449v1).
+
+**What fails:**
+
+1. Agents accumulate procedural **skills** (textual artifacts) and refine them
+   from trajectories, but skip explicit **diagnosis→outcome** re-measurement.
+2. Regressed skill edits ship without **rollback** (no proximal constraint).
+3. **Deletion** is treated as a generic edit instead of utility-aware consolidation.
+4. Trace/tool gates do not cover skill-library mutation integrity.
+
+**Product in this repo:**
+
+| Control | API |
+|---------|-----|
+| Edit type | `SkillEdit` |
+| Analysis | `analyze_skill_evolution` → `SkillEvolutionReport` |
+| Gate | `gate_skill_evolution(...)` |
+| Raise form | `assert_skill_evolution_ok` |
+
+**Rules (load-bearing):**
+
+- claim evolved + empty edits → **FAIL_LOUD**
+- refine/update without diagnosis → **FAIL**
+- mutating edit without post-edit `outcome_metric` → **FAIL**
+- outcome < baseline without `rolled_back` → **FAIL**
+- delete/prune without utility or outcome → **FAIL**
+- closed-loop healthy edits → **PASS**
+
+**Tests:** `tests/test_skillprox.py`
+
+**Non-Ornament:** Call `gate_skill_evolution` before accepting skill-library
+updates as production context. Pair with `gate_traces` / `gate_tool_calls`.
+
+---
+
 ## Related queue IDs
 
-- **WRITER-NOT-READER** — this case (P0)
-- **TRAJDEBUG** — intermediate error lifecycle (sibling)
-- **BITTER-TOOL** — tool-call pairing/schema/parallel/stale (this section)
+- **WRITER-NOT-READER** — reader/writer discipline (P0)
+- **TRAJDEBUG** — intermediate error lifecycle
+- **BITTER-TOOL** — tool-call pairing/schema/parallel/stale
+- **SKILLPROX** — skill evolution closed-loop (this section)
 - **SILENT-SUCCESS** — degraded exit-0 (notarize / groundcrew)
 - D-FOGHORN (foghorn) — oldest-as-current reader bug (sibling reader discipline)
