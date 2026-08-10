@@ -169,8 +169,7 @@ def analyze_skill_evolution(
     """Analyze skill edits for SkillProx closed-loop properties (no gate)."""
     parsed = [_as_edit(e, i) for i, e in enumerate(edits or [])]
     need_diag = {
-        _canon_kind(k)
-        for k in (require_diagnosis_for or sorted(MUTATING_KINDS - {"create"}))
+        _canon_kind(k) for k in (require_diagnosis_for or sorted(MUTATING_KINDS - {"create"}))
     }
 
     missing_diag: list[str] = []
