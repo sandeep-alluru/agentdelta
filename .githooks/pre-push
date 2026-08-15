@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Block push if local CI mirror fails (zero red GitHub CI policy).
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+export PATH="${HOME}/.local/bin:${PATH}"
+export GIT_EXEC_PATH="${GIT_EXEC_PATH:-$HOME/.local/lib/git-core}"
+
+if [[ "${SKIP_CI_LOCAL:-0}" == "1" ]]; then
+  echo "pre-push: SKIP_CI_LOCAL=1 — allowing push WITHOUT local CI (NOT recommended)"
+  exit 0
+fi
+
+SCRIPT="$ROOT/scripts/ci_local.sh"
+if [[ ! -x "$SCRIPT" ]]; then
+  echo "pre-push: missing $SCRIPT — installing from eagle-eyes if present"
+  EE="${HOME}/Agenthub/eagle-eyes/scripts/ci_local.sh"
+  if [[ -f "$EE" ]]; then
+    mkdir -p "$ROOT/scripts"
+    cp "$EE" "$SCRIPT"
+    chmod +x "$SCRIPT"
+  else
+    echo "pre-push ERROR: no ci_local.sh" >&2
+    exit 1
+  fi
+fi
+
+echo "pre-push: running ci_local.sh (set SKIP_CI_LOCAL=1 to bypass — will red GitHub)"
+exec "$SCRIPT"
