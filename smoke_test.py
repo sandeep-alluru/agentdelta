@@ -14,6 +14,7 @@ Exit 0 = all passed. Exit 1 = at least one failure.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -34,6 +35,13 @@ REPO_ROOT = Path(__file__).parent
 passed: list[str] = []
 failed: list[tuple[str, str]] = []
 
+
+
+def _secure_tmp(suffix: str = ".tmp") -> Path:
+    """Secure temp path (CodeQL: avoid tempfile.mktemp)."""
+    fd, name = tempfile.mkstemp(suffix=suffix)
+    os.close(fd)
+    return Path(name)
 
 def ok(name: str) -> None:
     passed.append(name)
@@ -131,7 +139,7 @@ def _test_trace_content_addressed_ids():
     assert n1.id != n3.id
 
 def _test_trace_save_load(tmp_path=None):
-    path = Path(tempfile.mktemp(suffix=".jsonl"))
+    path = _secure_tmp(suffix=".jsonl")
     trace = _build_weather_trace("save-load", "get_weather")
     trace.save(path)
     assert path.exists()
@@ -143,7 +151,7 @@ def _test_trace_save_load(tmp_path=None):
     path.unlink()
 
 def _test_trace_jsonl_format():
-    path = Path(tempfile.mktemp(suffix=".jsonl"))
+    path = _secure_tmp(suffix=".jsonl")
     trace = _build_weather_trace("fmt-test", "get_weather")
     trace.save(path)
     lines = path.read_text().strip().split("\n")
@@ -305,9 +313,9 @@ def _test_cli_diff_exit_code_regression():
     assert r.returncode == 1, f"Expected exit 1 for regression, got {r.returncode}"
 
 def _test_cli_diff_exit_code_clean():
-    path_a = Path(tempfile.mktemp(suffix=".jsonl"))
+    path_a = _secure_tmp(suffix=".jsonl")
     _build_weather_trace("same-a", "get_weather").save(path_a)
-    path_b = Path(tempfile.mktemp(suffix=".jsonl"))
+    path_b = _secure_tmp(suffix=".jsonl")
     _build_weather_trace("same-b", "get_weather").save(path_b)
     r = subprocess.run(
         [PYTHON, "-m", "agentdelta.cli", "diff", str(path_a), str(path_b), "--exit-code"],
@@ -366,7 +374,7 @@ def _test_api_diff_endpoint():
         raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
 
     def _trace_to_str(trace) -> str:
-        path = Path(tempfile.mktemp(suffix=".jsonl"))
+        path = _secure_tmp(suffix=".jsonl")
         trace.save(path)
         content = path.read_text()
         path.unlink()
@@ -390,7 +398,7 @@ def _test_api_inspect_endpoint():
     except ImportError:
         raise ImportError("agentdelta[api] not installed — skipping (pip install 'agentdelta[api]')")
 
-    path = Path(tempfile.mktemp(suffix=".jsonl"))
+    path = _secure_tmp(suffix=".jsonl")
     _build_weather_trace("api-inspect", "get_weather").save(path)
     content = path.read_text()
     path.unlink()
