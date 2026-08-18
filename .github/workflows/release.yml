@@ -69,7 +69,6 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
-    environment: pypi
 
     steps:
       - uses: actions/download-artifact@v8
