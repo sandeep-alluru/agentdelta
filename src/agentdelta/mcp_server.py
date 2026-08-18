@@ -110,8 +110,10 @@ def run_server() -> None:
             _mcp_types.Tool(
                 name="diff_traces",
                 description=(
-                    "Compare two agentdelta JSONL trace files. Returns a DiffResult JSON with "
-                    "fork_point (first divergent step), has_regression bool, and per-step details."
+                    "Compare two agentdelta trace files and summarize behavioral regressions. Use when "
+                    "validating that a prompt/model change did not alter tool order or outcomes. Provide "
+                    "two trace paths; returns a structured diff with has_regression and per-step details. "
+                    "Not for live recording — use record_snippet / inspect_trace for that."
                 ),
                 inputSchema={
                     "type": "object",
@@ -135,8 +137,7 @@ def run_server() -> None:
             _mcp_types.Tool(
                 name="inspect_trace",
                 description=(
-                    "Summarise a single agentdelta JSONL trace file: run_id, node count, "
-                    "step sequence with type and content preview."
+                    "Inspect a single agentdelta trace and summarize the agent's execution path (tools, timing, outcomes). Use for post-mortem debugging of one run. Use diff_traces when comparing two runs."
                 ),
                 inputSchema={
                     "type": "object",
@@ -149,7 +150,7 @@ def run_server() -> None:
             _mcp_types.Tool(
                 name="record_snippet",
                 description=(
-                    "Return a copy-paste Python snippet to record an agent run with agentdelta."
+                    "Return boilerplate Python that records an agent run with agentdelta. Use when scaffolding instrumentation for a new agent. Does not execute the agent itself."
                 ),
                 inputSchema={
                     "type": "object",
