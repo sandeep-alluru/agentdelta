@@ -1,5 +1,11 @@
 # Changelog
 
+
+## [0.1.4] - 2026-08-18
+
+### Changed
+- Publish Glama/MCP readiness: mcp pin <2, TDQS tool descriptions, Dockerfile from repo tip, glama.json.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
